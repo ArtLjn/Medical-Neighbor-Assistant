@@ -12,7 +12,10 @@ import (
 	"back/app/drug"
 	"back/app/medical"
 	"back/app/user"
+	"back/config"
 	"back/pkg/custom_log"
+	"back/pkg/data"
+	"back/pkg/ipfs"
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -30,9 +33,10 @@ var (
 func main() {
 	r := gin.Default()
 	go custom_log.InitGinLog("MediaNeighbor")
-	LoadConfig = InitConfig()
+	config.LoadConfig = config.InitConfig()
+	data.Db = data.NewDB()
 	srv := &http.Server{
-		Addr:    ":" + LoadConfig.Server.Port,
+		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,
 	}
 	// 注册相关服务
@@ -51,7 +55,7 @@ func main() {
 	<-quit
 	log.Println("Shutdown Server ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 0*time.Second)
 	<-finish
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
@@ -62,8 +66,9 @@ func main() {
 
 func registerService(r *gin.Engine) {
 	publicGroup := r.Group("/api")
+	publicGroup.POST("/upload", ipfs.GinUploadImg)
 	drug.InitDrugService(publicGroup)
 	Inquiry.InitInquiryService(publicGroup)
-	medical.InitMedicalService()
+	medical.InitMedicalService(publicGroup)
 	user.InitUserService(publicGroup)
 }

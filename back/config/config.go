@@ -5,7 +5,7 @@
 @Software: GoLand
 */
 
-package main
+package config
 
 import (
 	"fmt"
@@ -14,18 +14,25 @@ import (
 	"os"
 )
 
-var LoadConfig *OriginConfig
+var (
+	LoadConfig *OriginConfig
+)
 
 type OriginConfig struct {
 	Server struct {
 		Host string
 		Port string
 	}
-	Dns string
+	Dns        string
+	UploadRepo struct {
+		Domain  string `json:"domain"`   // 域名
+		MaxSize string `json:"max_size"` // 最大文件大小（字节）
+		Ipfs    string `json:"ipfs"`
+	}
 }
 
 func InitConfig() *OriginConfig {
-	cfg, err := ini.Load("config.ini")
+	cfg, err := ini.Load("./config/config.ini")
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
@@ -46,6 +53,15 @@ func InitConfig() *OriginConfig {
 			cfg.Section("mysql").Key("database").String(),
 			cfg.Section("mysql").Key("charset").String(),
 		),
+		UploadRepo: struct {
+			Domain  string `json:"domain"`   // 域名
+			MaxSize string `json:"max_size"` // 最大文件大小（字节）
+			Ipfs    string `json:"ipfs"`
+		}{
+			Domain:  cfg.Section("upload").Key("domain").String(),
+			MaxSize: cfg.Section("upload").Key("max_size").String(),
+			Ipfs:    cfg.Section("upload").Key("ipfs").String(),
+		},
 	}
 
 }
