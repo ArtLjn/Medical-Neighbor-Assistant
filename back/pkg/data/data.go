@@ -9,11 +9,15 @@ package data
 
 import (
 	"back/config"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-var Db *gorm.DB
+var (
+	Db  *gorm.DB
+	Rdb *redis.Client
+)
 
 func NewDB() *gorm.DB {
 	db, err := gorm.Open(mysql.Open(config.LoadConfig.Dns), &gorm.Config{
@@ -25,12 +29,12 @@ func NewDB() *gorm.DB {
 	return db
 }
 
-//func NewRDB() *redis.Client {
-//	return redis.NewClient(
-//		&redis.Options{
-//			Addr:     conf.Redis.Addr,
-//			DB:       conf.Redis.Db,
-//			Password: conf.Redis.Password,
-//		},
-//	)
-//}
+func NewRDB() *redis.Client {
+	return redis.NewClient(
+		&redis.Options{
+			Addr:     config.LoadConfig.Redis.Addr,
+			DB:       config.LoadConfig.Redis.Db,
+			Password: config.LoadConfig.Redis.Password,
+		},
+	)
+}

@@ -33,6 +33,11 @@ type OriginConfig struct {
 		Username string
 		Password string
 	}
+	Redis struct {
+		Addr     string `json:"addr"`
+		Password string `json:"password"`
+		Db       int    `json:"db"`
+	}
 }
 
 func InitConfig() *OriginConfig {
@@ -72,6 +77,15 @@ func InitConfig() *OriginConfig {
 		}{
 			Username: cfg.Section("defaultAdmin").Key("username").String(),
 			Password: cfg.Section("defaultAdmin").Key("password").String(),
+		},
+		Redis: struct {
+			Addr     string `json:"addr"`
+			Password string `json:"password"`
+			Db       int    `json:"db"`
+		}{
+			Addr:     cfg.Section("redis").Key("addr").String(),
+			Password: cfg.Section("redis").Key("password").String(),
+			Db:       cfg.Section("redis").Key("db").MustInt(),
 		},
 	}
 

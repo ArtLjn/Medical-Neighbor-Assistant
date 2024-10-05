@@ -13,6 +13,7 @@ import (
 	"back/pkg/custom_log"
 	"back/pkg/data"
 	"back/pkg/ipfs"
+	"back/pkg/token"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -24,8 +25,7 @@ var (
 func main() {
 	r := gin.Default()
 	go custom_log.InitGinLog("MediaNeighbor")
-	config.LoadConfig = config.InitConfig()
-	data.Db = data.NewDB()
+	wireApp()
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,
@@ -62,4 +62,11 @@ func registerService(r *gin.Engine) {
 	server.InitInquiryService(publicGroup)
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
+}
+
+func wireApp() {
+	config.LoadConfig = config.InitConfig()
+	data.Db = data.NewDB()
+	data.Rdb = data.NewRDB()
+	token.TokenF = token.NewToken(data.Rdb)
 }

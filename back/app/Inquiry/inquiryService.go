@@ -86,9 +86,9 @@ func QueryPatientInquiryRecord(name string, isInquiry int) []model.Inquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
 	case InquiryFalse:
-		query = query.Where("is_reception = ?", false)
+		query = query.Where("is_inquiry = ?", false)
 	default:
-		panic("unhandled default case")
+		return nil
 	}
 	if err := query.Find(&inquiry).Error; err != nil {
 		log.Println(err)

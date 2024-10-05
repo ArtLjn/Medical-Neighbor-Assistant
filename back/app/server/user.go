@@ -15,6 +15,7 @@ import (
 	"back/pkg/data/model"
 	"back/pkg/data/vo"
 	"back/pkg/response"
+	"back/pkg/token"
 	"back/pkg/util"
 	"fmt"
 	"strings"
@@ -33,6 +34,8 @@ func InitUserService(group *gin.RouterGroup) {
 		userGroup.POST("/uploadUserMessage", UploadUserMessage)
 		userGroup.PUT("/updatePatientInformation", UpdatePatientInformation)
 		userGroup.PUT("/updatePhysicianInformation", UpdatePhysicianInformation)
+		userGroup.GET("/logOut", LogOut)
+		userGroup.GET("/verifyToken", VerifyToken)
 	}
 }
 
@@ -58,6 +61,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 	util.BeanUtil.CopyProperties(account, &responseVo)
+	responseVo.Token = token.TokenF.SaveToken(receiver.Username)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(responseVo).Build(ctx)
 }
 
@@ -167,5 +171,37 @@ func AdminLoginS(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
 		return
 	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(map[string]interface{}{
+		"token": token.TokenF.SaveToken(receiver.Username),
+	}).Build(ctx)
+}
+
+// VerifyToken 验证token
+func VerifyToken(ctx *gin.Context) {
+	authorization := ctx.GetHeader("Authorization")
+	if authorization == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
+		return
+	}
+	if err := token.TokenF.VerifyToken(authorization); err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+// LogOut 退出登录
+func LogOut(ctx *gin.Context) {
+	authorization := ctx.GetHeader("Authorization")
+	if authorization == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
+		return
+	}
+	if err := token.TokenF.VerifyToken(authorization); err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
+		return
+	}
+	username := token.GetLoginName(authorization)
+	token.TokenF.LogOutToken(username)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
 }

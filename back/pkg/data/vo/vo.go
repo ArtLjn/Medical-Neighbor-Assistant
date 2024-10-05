@@ -18,4 +18,5 @@ type LoginResponseVo struct {
 	ChainAccount string `json:"chain_account" gorm:"type:varchar(255);comment:区块链账户地址"` // 区块链账户地址
 	HomeAddr     string `json:"home_addr" gorm:"type:varchar(255);comment:家庭地址"`        // 家庭地址
 	Nickname     string `json:"nickname" gorm:"type:varchar(255);comment:昵称"`           // 昵称
+	Token        string `json:"token" gorm:"type:varchar(255);comment:token"`           // token
 }
