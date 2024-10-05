@@ -5,7 +5,7 @@
 @Software: GoLand
 */
 
-package medical
+package server
 
 import "github.com/gin-gonic/gin"
 

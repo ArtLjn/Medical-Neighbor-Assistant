@@ -8,10 +8,7 @@
 package main
 
 import (
-	"back/app/Inquiry"
-	"back/app/drug"
-	"back/app/medical"
-	"back/app/user"
+	"back/app/server"
 	"back/config"
 	"back/pkg/custom_log"
 	"back/pkg/data"
@@ -61,8 +58,8 @@ func main() {
 func registerService(r *gin.Engine) {
 	publicGroup := r.Group("/api")
 	publicGroup.POST("/upload", ipfs.GinUploadImg)
-	drug.InitDrugService(publicGroup)
-	Inquiry.InitInquiryService(publicGroup)
-	medical.InitMedicalService(publicGroup)
-	user.InitUserService(publicGroup)
+	server.InitDrugService(publicGroup)
+	server.InitInquiryService(publicGroup)
+	server.InitMedicalService(publicGroup)
+	server.InitUserService(publicGroup)
 }

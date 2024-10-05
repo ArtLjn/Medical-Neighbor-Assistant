@@ -5,7 +5,7 @@
 @Software: GoLand
 */
 
-package drug
+package server
 
 import "github.com/gin-gonic/gin"
 

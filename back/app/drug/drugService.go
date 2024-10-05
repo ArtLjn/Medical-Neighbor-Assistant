@@ -5,4 +5,4 @@
 @Software: GoLand
 */
 
-package service
+package drug

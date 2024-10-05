@@ -17,6 +17,8 @@ type Account struct {
 	Phone        string `json:"phone" gorm:"type:varchar(11);comment:电话"`               // 电话
 	Hospital     string `json:"hospital" gorm:"type:varchar(255);comment:所属医院"`         // 所属医院
 	ChainAccount string `json:"chain_account" gorm:"type:varchar(255);comment:区块链账户地址"` // 区块链账户地址
+	HomeAddr     string `json:"home_addr" gorm:"type:varchar(255);comment:家庭地址"`        // 家庭地址
+	Nickname     string `json:"nickname" gorm:"type:varchar(255);comment:昵称"`           // 昵称
 }
 
 type Drug struct {
@@ -43,6 +45,7 @@ type Inquiry struct {
 	Physician       string `json:"physician" gorm:"type:varchar(255);comment:指派医师"`        // 指派医师
 	Type            string `json:"type" gorm:"type:varchar(20);comment:类型"`                // 类型
 	InquiryDetail   string `json:"inquiry_detail" gorm:"type:text;comment:问诊描述"`           // 问诊描述
+	Sex             string `json:"sex" gorm:"type:varchar(20);comment:性别"`                 // 性别
 }
 
 type Medical struct {

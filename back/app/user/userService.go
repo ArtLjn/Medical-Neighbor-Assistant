@@ -5,13 +5,15 @@
 @Software: GoLand
 */
 
-package service
+package user
 
 import (
 	"back/pkg/data"
+	"back/pkg/data/bo"
 	"back/pkg/data/model"
 	"back/pkg/role"
 	"back/pkg/util"
+	"errors"
 	"log"
 	"sync"
 
@@ -52,9 +54,10 @@ func WritePatientToDB(receiver [][]string) {
 		}
 		account := model.Account{
 			Username:     v[0],
-			Password:     v[1],
-			Sex:          v[2],
-			Phone:        v[3],
+			Sex:          v[1],
+			Phone:        v[2],
+			HomeAddr:     v[3],
+			Password:     "123456",
 			UUID:         uuid.New().String()[:8],
 			Role:         role.Patient,
 			ChainAccount: util.GenerateAccount()["address"],
@@ -82,10 +85,10 @@ func WritePhysicianToDB(receiver [][]string) {
 		}
 		account := model.Account{
 			Username:     v[0],
-			Password:     v[1],
-			Sex:          v[2],
-			Phone:        v[3],
-			Hospital:     v[4],
+			Sex:          v[1],
+			Phone:        v[2],
+			Hospital:     v[3],
+			Password:     "123456",
 			UUID:         uuid.New().String()[:8],
 			Role:         role.Physician,
 			ChainAccount: util.GenerateAccount()["address"],
@@ -99,4 +102,30 @@ func WritePhysicianToDB(receiver [][]string) {
 			log.Println(err)
 		}
 	}
+}
+
+func UpdatePatientMessage(uuid string, message bo.PatientUpdateMessage) error {
+	account := QueryUser(map[string]interface{}{"uuid": uuid})
+	if account == (model.Account{}) {
+		return errors.New("用户不存在")
+	}
+	util.BeanUtil.CopyProperties(message, &account)
+	err := data.Db.Model(&account).Updates(account).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdatePhysician(uuid string, message bo.PhysicianUpdateMessage) error {
+	account := QueryUser(map[string]interface{}{"uuid": uuid})
+	if account == (model.Account{}) {
+		return errors.New("用户不存在")
+	}
+	util.BeanUtil.CopyProperties(message, &account)
+	err := data.Db.Model(&account).Updates(account).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -7,7 +7,10 @@
 
 package response
 
-import "github.com/gin-gonic/gin"
+import (
+	"back/pkg/custom_error"
+	"github.com/gin-gonic/gin"
+)
 
 var PublicResponse ResponseBuild
 
@@ -55,9 +58,9 @@ func (r *ResponseBuild) Build(ctx *gin.Context) {
 }
 
 func (r *ResponseBuild) NewBuildJsonError(ctx *gin.Context) {
-	r.SetCode(400).SetMsg("json error").SetData(nil).Build(ctx)
+	r.SetCode(custom_error.ClientErrorCode).SetMsg("json error").SetData(nil).Build(ctx)
 }
 
 func (r *ResponseBuild) NewBuildSuccess(ctx *gin.Context) {
-	r.SetCode(200).SetMsg("success").SetData(nil).Build(ctx)
+	r.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(nil).Build(ctx)
 }
