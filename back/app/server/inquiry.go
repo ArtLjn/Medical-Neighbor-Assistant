@@ -15,6 +15,7 @@ import (
 	"back/pkg/data/model"
 	"back/pkg/response"
 	"back/pkg/role"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,9 +24,12 @@ func InitInquiryService(group *gin.RouterGroup) {
 	inquiryGroup := group.Group("/inquiry")
 	{
 		inquiryGroup.POST("/createInquiryRecord", CreateInquiryRecord)
-		inquiryGroup.GET("/queryInquiryRecord", QueryInquiryRecord)
-		inquiryGroup.POST("/approveInquiryRecord", ApproveInquiryRecord)
+		inquiryGroup.GET("/queryPatientInquiryRecord", QueryPatientInquiryRecord)
+		inquiryGroup.GET("/queryPhysicianInquiryRecord", QueryPhysicianInquiryRecord)
+		inquiryGroup.PUT("/approveInquiryRecord", ApproveInquiryRecord)
 		inquiryGroup.POST("/appointedPhysician", AppointPhysician)
+		inquiryGroup.GET("/queryAllInquiryRecord", QueryAllInquiryRecord)
+		inquiryGroup.PUT("/physicianReception", PhysicianReception)
 	}
 }
 
@@ -46,14 +50,53 @@ func CreateInquiryRecord(ctx *gin.Context) {
 	response.PublicResponse.NewBuildSuccess(ctx)
 }
 
-// QueryInquiryRecord 查询问诊记录
-func QueryInquiryRecord(ctx *gin.Context) {
+// QueryAllInquiryRecord 查询所有问诊记录: 管理员使用
+// @param isInquiry 1: 已经问诊结束 2: 未问诊 3: 未指派医师 4: 代接诊
+func QueryAllInquiryRecord(ctx *gin.Context) {
+	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
+	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
+		SetData(Inquiry.QueryAllInquiry(isInquiry)).Build(ctx)
+}
 
+// QueryPatientInquiryRecord 查询问诊患者记录
+func QueryPatientInquiryRecord(ctx *gin.Context) {
+	name := ctx.Query("name")
+	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
+	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	if name == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).
+		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(name, isInquiry)).Build(ctx)
+}
+
+// QueryPhysicianInquiryRecord 查询问诊医生记录
+func QueryPhysicianInquiryRecord(ctx *gin.Context) {
+	name := ctx.Query("name")
+	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
+	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	if name == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
+		SetData(Inquiry.QueryPhysicianInquiryRecord(name, isInquiry)).Build(ctx)
 }
 
 // ApproveInquiryRecord 审批问诊记录
 func ApproveInquiryRecord(ctx *gin.Context) {
-
+	id := ctx.Query("id")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	if !Inquiry.UpdateIsInquiry(id) {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.NewBuildSuccess(ctx)
 }
 
 // AppointPhysician 指派医生
@@ -65,13 +108,33 @@ func AppointPhysician(ctx *gin.Context) {
 		return
 	}
 	if user.QueryUser(map[string]interface{}{
-		"name": name,
-		"role": role.Physician,
+		"username": name,
+		"role":     role.Physician,
 	}) == (model.Account{}) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
 		return
 	}
+	if Inquiry.IsReception(id) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录已被接诊").Build(ctx)
+		return
+	}
 	if err := Inquiry.UpdateInquiryPhysician(id, name); err != nil {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.NewBuildSuccess(ctx)
+}
+
+// PhysicianReception  医师接诊
+func PhysicianReception(ctx *gin.Context) {
+	id := ctx.Query("id")
+	isReceptionStr := ctx.Query("isReception")
+	isReception, _ := strconv.ParseBool(isReceptionStr)
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	if !Inquiry.UpdateIsReception(id, isReception) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}

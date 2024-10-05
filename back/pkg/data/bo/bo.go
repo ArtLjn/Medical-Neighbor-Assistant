@@ -25,6 +25,7 @@ type CreateInquiryBo struct {
 }
 
 type PatientUpdateMessage struct {
+	UUID     string `json:"uuid" validate:"required"`
 	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 	HomeAddr string `json:"home_addr"`
@@ -32,6 +33,7 @@ type PatientUpdateMessage struct {
 }
 
 type PhysicianUpdateMessage struct {
+	UUID     string `json:"uuid" validate:"required"`
 	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 	Hospital string `json:"hospital"`

@@ -27,6 +27,7 @@ func InitUserService(group *gin.RouterGroup) {
 	userGroup := group.Group("/user")
 	{
 		userGroup.POST("/login", Login)
+		userGroup.POST("/adminLogin", AdminLoginS)
 		userGroup.GET("/queryPatientInformation", QueryPatientInformation)
 		userGroup.GET("/queryDoctorInformation", QueryDoctorInformation)
 		userGroup.POST("/uploadUserMessage", UploadUserMessage)
@@ -128,12 +129,11 @@ func QueryDoctorInformation(ctx *gin.Context) {
 // UpdatePatientInformation 更新病人信息
 func UpdatePatientInformation(ctx *gin.Context) {
 	var patientMes bo.PatientUpdateMessage
-	id := ctx.Query("uuid")
 	if err := ctx.ShouldBindJSON(&patientMes); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return
 	}
-	if err := user.UpdatePatientMessage(id, patientMes); err != nil {
+	if err := user.UpdatePatientMessage(patientMes); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return
 	}
@@ -143,13 +143,28 @@ func UpdatePatientInformation(ctx *gin.Context) {
 // UpdatePhysicianInformation 更新医生信息
 func UpdatePhysicianInformation(ctx *gin.Context) {
 	var physicianMes bo.PhysicianUpdateMessage
-	id := ctx.Query("uuid")
 	if err := ctx.ShouldBindJSON(&physicianMes); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return
 	}
-	if err := user.UpdatePhysician(id, physicianMes); err != nil {
+	if err := user.UpdatePhysician(physicianMes); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+// AdminLoginS 管理员登录
+func AdminLoginS(ctx *gin.Context) {
+	var receiver bo.LoginBo
+	if err := ctx.ShouldBindJSON(&receiver); err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
+		return
+	} else if err = bo.Validate(receiver); err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
+		return
+	} else if !user.AdminLogin(receiver) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
 		return
 	}
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)

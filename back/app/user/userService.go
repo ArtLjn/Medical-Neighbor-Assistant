@@ -8,6 +8,7 @@
 package user
 
 import (
+	"back/config"
 	"back/pkg/data"
 	"back/pkg/data/bo"
 	"back/pkg/data/model"
@@ -104,8 +105,8 @@ func WritePhysicianToDB(receiver [][]string) {
 	}
 }
 
-func UpdatePatientMessage(uuid string, message bo.PatientUpdateMessage) error {
-	account := QueryUser(map[string]interface{}{"uuid": uuid})
+func UpdatePatientMessage(message bo.PatientUpdateMessage) error {
+	account := QueryUser(map[string]interface{}{"uuid": message.UUID})
 	if account == (model.Account{}) {
 		return errors.New("用户不存在")
 	}
@@ -117,8 +118,8 @@ func UpdatePatientMessage(uuid string, message bo.PatientUpdateMessage) error {
 	return nil
 }
 
-func UpdatePhysician(uuid string, message bo.PhysicianUpdateMessage) error {
-	account := QueryUser(map[string]interface{}{"uuid": uuid})
+func UpdatePhysician(message bo.PhysicianUpdateMessage) error {
+	account := QueryUser(map[string]interface{}{"uuid": message.UUID})
 	if account == (model.Account{}) {
 		return errors.New("用户不存在")
 	}
@@ -128,4 +129,12 @@ func UpdatePhysician(uuid string, message bo.PhysicianUpdateMessage) error {
 		return err
 	}
 	return nil
+}
+
+func AdminLogin(receiver bo.LoginBo) bool {
+	if receiver.Username == config.LoadConfig.DefaultAdmin.Username &&
+		receiver.Password == config.LoadConfig.DefaultAdmin.Password {
+		return true
+	}
+	return false
 }

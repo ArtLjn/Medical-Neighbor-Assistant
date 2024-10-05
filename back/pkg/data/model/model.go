@@ -46,6 +46,8 @@ type Inquiry struct {
 	Type            string `json:"type" gorm:"type:varchar(20);comment:类型"`                // 类型
 	InquiryDetail   string `json:"inquiry_detail" gorm:"type:text;comment:问诊描述"`           // 问诊描述
 	Sex             string `json:"sex" gorm:"type:varchar(20);comment:性别"`                 // 性别
+	IsInquiry       bool   `json:"is_inquiry" gorm:"type:tinyint(1);comment:是否已经问诊"`       // 是否已经问诊
+	IsReception     bool   `json:"is_reception" gorm:"type:tinyint(1);comment:是否已经接诊"`     // 是否已经接诊
 }
 
 type Medical struct {

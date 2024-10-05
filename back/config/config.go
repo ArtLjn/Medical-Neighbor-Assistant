@@ -29,6 +29,10 @@ type OriginConfig struct {
 		MaxSize string `json:"max_size"` // 最大文件大小（字节）
 		Ipfs    string `json:"ipfs"`
 	}
+	DefaultAdmin struct {
+		Username string
+		Password string
+	}
 }
 
 func InitConfig() *OriginConfig {
@@ -61,6 +65,13 @@ func InitConfig() *OriginConfig {
 			Domain:  cfg.Section("upload").Key("domain").String(),
 			MaxSize: cfg.Section("upload").Key("max_size").String(),
 			Ipfs:    cfg.Section("upload").Key("ipfs").String(),
+		},
+		DefaultAdmin: struct {
+			Username string
+			Password string
+		}{
+			Username: cfg.Section("defaultAdmin").Key("username").String(),
+			Password: cfg.Section("defaultAdmin").Key("password").String(),
 		},
 	}
 
