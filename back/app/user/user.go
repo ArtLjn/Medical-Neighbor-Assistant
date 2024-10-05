@@ -21,6 +21,7 @@ func InitUserService(group *gin.RouterGroup) {
 		userGroup.POST("/login", Login)
 		userGroup.GET("/queryPatientInformation", QueryPatientInformation)
 		userGroup.GET("/queryDoctorInformation", QueryDoctorInformation)
+		userGroup.POST("/uploadUserMessage", UploadUserMessage)
 	}
 }
 
@@ -49,12 +50,17 @@ func Login(ctx *gin.Context) {
 	return
 }
 
+// UploadUserMessage 批量导入用户信息
+func UploadUserMessage(ctx *gin.Context) {
+
+}
+
 // QueryPatientInformation 查询病人信息
 func QueryPatientInformation(ctx *gin.Context) {
-
+	response.PublicResponse.SetCode(200).SetMsg("success").SetData(service.QueryAllPatient()).Build(ctx)
 }
 
 // QueryDoctorInformation 查询医生信息
 func QueryDoctorInformation(ctx *gin.Context) {
-
+	response.PublicResponse.SetCode(200).SetMsg("success").SetData(service.QueryAllPhysician()).Build(ctx)
 }

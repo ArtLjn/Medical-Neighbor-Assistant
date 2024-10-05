@@ -10,6 +10,7 @@ package service
 import (
 	"back/pkg/data"
 	"back/pkg/data/model"
+	"back/pkg/role"
 )
 
 func QueryUser(cond map[string]interface{}) model.Account {
@@ -20,4 +21,16 @@ func QueryUser(cond map[string]interface{}) model.Account {
 	var account model.Account
 	query.First(&account)
 	return account
+}
+
+func QueryAllPatient() []model.Account {
+	var accounts []model.Account
+	data.Db.Where("role = ?", role.Patient).Select("-password").Find(&accounts)
+	return accounts
+}
+
+func QueryAllPhysician() []model.Account {
+	var accounts []model.Account
+	data.Db.Where("role = ?", role.Physician).Find(&accounts)
+	return accounts
 }
