@@ -16,14 +16,8 @@ import (
 	"back/pkg/custom_log"
 	"back/pkg/data"
 	"back/pkg/ipfs"
-	"context"
-	"errors"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 var (
@@ -41,27 +35,27 @@ func main() {
 	}
 	// 注册相关服务
 	registerService(r)
-
-	go func() {
-		// 服务连接
-		if err := srv.ListenAndServe(); !(err == nil || errors.Is(err, http.ErrServerClosed)) {
-			log.Fatalf("listen: %s\n", err)
-		}
-	}()
-
-	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
-	log.Println("Shutdown Server ...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 0*time.Second)
-	<-finish
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
-	}
-	log.Println("Server exiting")
+	r.Run(srv.Addr)
+	//go func() {
+	//	// 服务连接
+	//	if err := srv.ListenAndServe(); !(err == nil || errors.Is(err, http.ErrServerClosed)) {
+	//		log.Fatalf("listen: %s\n", err)
+	//	}
+	//}()
+	//
+	//// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	//quit := make(chan os.Signal, 1)
+	//signal.Notify(quit, os.Interrupt)
+	//<-quit
+	//log.Println("Shutdown Server ...")
+	//
+	//ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	//<-finish
+	//defer cancel()
+	//if err := srv.Shutdown(ctx); err != nil {
+	//	log.Fatal("Server Shutdown:", err)
+	//}
+	//log.Println("Server exiting")
 }
 
 func registerService(r *gin.Engine) {

@@ -29,6 +29,7 @@ func TestReadExcel(t *testing.T) {
 		t.Fatalf("读取Sheet1失败: %v", err)
 	}
 	fmt.Println("Sheet1的数据:")
+	fmt.Println(rows)
 	for _, row := range rows {
 		fmt.Println(row)
 	}
