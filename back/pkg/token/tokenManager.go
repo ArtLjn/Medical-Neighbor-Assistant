@@ -2,6 +2,9 @@ package token
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"log"
@@ -16,7 +19,7 @@ const TokenMangerKey = "token_manager"
 type TokenManager interface {
 	SaveToken(string) string
 	LogOutToken(string)
-	VerifyToken(string) error
+	VerifyToken(string) (string, error)
 }
 
 type Token struct {
@@ -28,14 +31,23 @@ func NewToken(rdb *redis.Client) TokenManager {
 		rdb: rdb,
 	}
 }
-
+func generateRandomToken(n int) (string, error) {
+	// 创建一个字节数组来存储随机字节
+	b := make([]byte, n)
+	// 使用 crypto/rand 生成随机字节
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	// 将随机字节转换为十六进制字符串
+	return hex.EncodeToString(b), nil
+}
 func (t *Token) SaveToken(username string) string {
-	token, err := Sign(username)
+	token, err := generateRandomToken(16)
 	if err != nil {
 		log.Println("❌ 生成token失败")
 		return ""
 	}
-	_, err = t.rdb.HSet(context.Background(), TokenMangerKey, username, token).Result()
+	_, err = t.rdb.HSet(context.Background(), TokenMangerKey, token, username).Result()
 	if err != nil {
 		log.Println("❌ 保存token失败")
 		return ""
@@ -50,20 +62,11 @@ func (t *Token) LogOutToken(username string) {
 	}
 }
 
-func (t *Token) VerifyToken(token string) error {
-	username := GetLoginName(token)
-	if username == "" {
-		log.Println("❌ token无效")
-		return fmt.Errorf("❌ token无效")
-	}
-	cacheToken, err := t.rdb.HGet(context.Background(), TokenMangerKey, username).Result()
-	if err != nil {
+func (t *Token) VerifyToken(token string) (string, error) {
+	uuid, err := t.rdb.HGet(context.Background(), TokenMangerKey, token).Result()
+	if errors.Is(err, redis.Nil) {
 		log.Println("❌ token不存在")
-		return fmt.Errorf("❌ token不存在")
+		return "", fmt.Errorf("❌ token不存在")
 	}
-	if token != cacheToken {
-		log.Println("❌ token不匹配")
-		return fmt.Errorf("❌ token无效")
-	}
-	return nil
+	return uuid, nil
 }

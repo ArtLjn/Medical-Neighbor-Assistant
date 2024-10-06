@@ -146,18 +146,86 @@ func QueryInquiryRecordByCond(cond map[string]interface{}) model.Inquiry {
 func transferToInquiryVo(receiver []model.Inquiry) []vo.QueryInquiryVo {
 	var (
 		inquiryResponse []vo.QueryInquiryVo
+		wg              sync.WaitGroup
 		mx              sync.Mutex
 	)
-	mx.Lock()
-	defer mx.Unlock()
-	for _, v := range receiver {
-		patient := user.QueryUser(map[string]interface{}{"uuid": v.Patient})
-		physician := user.QueryUser(map[string]interface{}{"uuid": v.Physician})
-		var inquiryVo vo.QueryInquiryVo
-		util.BeanUtil.CopyProperties(v, &inquiryVo)
-		util.BeanUtil.CopyProperties(patient, &inquiryVo.Patient)
-		util.BeanUtil.CopyProperties(physician, &inquiryVo.Physician)
-		inquiryResponse = append(inquiryResponse, inquiryVo)
+	inquiryResponse = make([]vo.QueryInquiryVo, len(receiver))
+
+	for i, v := range receiver {
+		wg.Add(1)
+		go func(i int, v model.Inquiry) {
+			defer wg.Done()
+
+			// 并发查询患者和医生信息
+			var patient, physician model.Account
+			var inquiryVo vo.QueryInquiryVo
+			c := make(chan struct{}, 2)
+
+			go func() {
+				patient = user.QueryUser(map[string]interface{}{"uuid": v.Patient})
+				c <- struct{}{}
+			}()
+
+			go func() {
+				physician = user.QueryUser(map[string]interface{}{"uuid": v.Physician})
+				c <- struct{}{}
+			}()
+
+			// 等待两个查询完成
+			<-c
+			<-c
+
+			util.BeanUtil.CopyProperties(v, &inquiryVo)
+			util.BeanUtil.CopyProperties(patient, &inquiryVo.Patient)
+			util.BeanUtil.CopyProperties(physician, &inquiryVo.Physician)
+
+			// 锁住写操作，避免数据竞态
+			mx.Lock()
+			inquiryResponse[i] = inquiryVo
+			mx.Unlock()
+		}(i, v)
 	}
+
+	wg.Wait()
 	return inquiryResponse
+}
+
+func TransferToInquiryVo(receiver model.Inquiry) vo.QueryInquiryVo {
+	var (
+		inquiryVo          vo.QueryInquiryVo
+		patient, physician model.Account
+	)
+
+	// 创建一个具有两个结果的 channel
+	resultChan := make(chan interface{}, 2)
+
+	// 并发查询患者和医生信息
+	go func() {
+		resultChan <- user.QueryUser(map[string]interface{}{"uuid": receiver.Patient})
+	}()
+
+	go func() {
+		resultChan <- user.QueryUser(map[string]interface{}{"uuid": receiver.Physician})
+	}()
+
+	// 获取 Goroutines 的查询结果
+	for i := 0; i < 2; i++ {
+		result := <-resultChan
+		switch res := result.(type) {
+		case model.Account:
+			// 根据 UUID 判断是患者还是医生
+			if res.UUID == receiver.Patient {
+				patient = res
+			} else if res.UUID == receiver.Physician {
+				physician = res
+			}
+		}
+	}
+
+	// 进行属性复制
+	util.BeanUtil.CopyProperties(receiver, &inquiryVo)
+	util.BeanUtil.CopyProperties(patient, &inquiryVo.Patient)
+	util.BeanUtil.CopyProperties(physician, &inquiryVo.Physician)
+
+	return inquiryVo
 }

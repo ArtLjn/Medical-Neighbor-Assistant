@@ -30,6 +30,7 @@ func InitInquiryService(group *gin.RouterGroup) {
 		inquiryGroup.POST("/appointedPhysician", AppointPhysician)
 		inquiryGroup.GET("/queryAllInquiryRecord", QueryAllInquiryRecord)
 		inquiryGroup.PUT("/physicianReception", PhysicianReception)
+		inquiryGroup.GET("/queryInquiryRecordById", QueryInquiryRecordById)
 	}
 }
 
@@ -94,6 +95,16 @@ func QueryPhysicianInquiryRecord(ctx *gin.Context) {
 	isInquiry, _ := strconv.Atoi(isInquiryStr)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
 		SetData(Inquiry.QueryPhysicianInquiryRecord(userMessage.UUID, isInquiry)).Build(ctx)
+}
+
+func QueryInquiryRecordById(ctx *gin.Context) {
+	id := ctx.Query("id")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
+		SetData(Inquiry.TransferToInquiryVo(Inquiry.QueryInquiryRecordByCond(map[string]interface{}{"id": id}))).Build(ctx)
 }
 
 // ApproveInquiryRecord 审批问诊记录

@@ -93,6 +93,8 @@ func initGinLog(cf *config.OriginConfig) {
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
+	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
+	log.SetOutput(f)
 	gin.DefaultWriter = io.MultiWriter(f)
 }

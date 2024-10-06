@@ -15,11 +15,9 @@ import (
 	"back/pkg/role"
 	"back/pkg/util"
 	"errors"
+	"github.com/google/uuid"
 	"log"
 	"strconv"
-	"sync"
-
-	"github.com/google/uuid"
 )
 
 func QueryUser(cond map[string]interface{}) model.Account {
@@ -44,68 +42,53 @@ func QueryAllPhysician() []model.Account {
 	return accounts
 }
 
-func WritePatientToDB(receiver [][]string) {
-	var mx sync.Mutex
-	mx.Lock()
-	defer mx.Unlock()
-
+func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 	var accounts []model.Account
+
 	for i, v := range receiver {
 		if i == 0 {
 			continue
 		}
-		a, _ := strconv.Atoi(v[4])
+
 		account := model.Account{
 			Username:     v[0],
 			Sex:          v[1],
 			Phone:        v[2],
-			HomeAddr:     v[3],
-			Age:          a,
 			Password:     "123456",
 			UUID:         uuid.New().String()[:8],
-			Role:         role.Patient,
+			Role:         roleType,
 			ChainAccount: util.GenerateAccount()["address"],
 		}
+
+		if isPhysician {
+			// 处理医生特有的字段
+			account.Hospital = v[3]
+		} else {
+			// 处理患者特有的字段
+			account.HomeAddr = v[3]
+			age, _ := strconv.Atoi(v[4]) // 转换年龄
+			account.Age = age
+		}
+
 		accounts = append(accounts, account)
 	}
 
 	if len(accounts) > 0 {
 		err := data.Db.Create(&accounts).Error
 		if err != nil {
-			log.Println(err)
+			log.Println("Error while inserting accounts:", err)
 		}
 	}
 }
 
+// WritePatientToDB  写入患者数据
+func WritePatientToDB(receiver [][]string) {
+	WriteAccountsToDB(receiver, role.Patient, false)
+}
+
+// WritePhysicianToDB  写入医生数据
 func WritePhysicianToDB(receiver [][]string) {
-	var mx sync.Mutex
-	mx.Lock()
-	defer mx.Unlock()
-
-	var accounts []model.Account
-	for i, v := range receiver {
-		if i == 0 {
-			continue
-		}
-		account := model.Account{
-			Username:     v[0],
-			Sex:          v[1],
-			Phone:        v[2],
-			Hospital:     v[3],
-			Password:     "123456",
-			UUID:         uuid.New().String()[:8],
-			Role:         role.Physician,
-			ChainAccount: util.GenerateAccount()["address"],
-		}
-		accounts = append(accounts, account)
-	}
-
-	if len(accounts) > 0 {
-		err := data.Db.Create(&accounts).Error
-		if err != nil {
-			log.Println(err)
-		}
-	}
+	WriteAccountsToDB(receiver, role.Physician, true)
 }
 
 func UpdatePatientMessage(message bo.PatientUpdateMessage) error {
@@ -134,7 +117,7 @@ func UpdatePhysician(message bo.PhysicianUpdateMessage) error {
 	return nil
 }
 
-func AdminLogin(receiver bo.LoginBo) bool {
+func AdminLogin(receiver bo.AdminLoginBo) bool {
 	if receiver.Username == config.LoadConfig.DefaultAdmin.Username &&
 		receiver.Password == config.LoadConfig.DefaultAdmin.Password {
 		return true

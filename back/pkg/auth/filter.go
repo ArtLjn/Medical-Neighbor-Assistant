@@ -42,26 +42,41 @@ func WithAuthorizationFilter() Option {
 
 func (a authorizationFilter) Apply() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		// 检查请求路径是否需要授权
 		if IsPathInList(ctx.Request.URL.Path, config.LoadConfig.AuthorizationFilter.NeedAuthorizationApiList) {
 			authorization := ctx.GetHeader("Authorization")
 			if authorization == "" {
+				// 如果 token 为空，返回错误并终止请求
 				response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
 				ctx.Abort()
+				return
 			}
-			if err := token.TokenF.VerifyToken(authorization); err != nil {
+
+			// 验证 token
+			parseUUID, err := token.TokenF.VerifyToken(authorization)
+			if err != nil {
+				// token 验证失败，返回错误并终止请求
 				response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 				ctx.Abort()
+				return
 			}
-			parseUUID := token.GetLoginName(authorization)
+
+			// 根据 UUID 查询用户信息
 			account := user.QueryUser(map[string]interface{}{
 				"uuid": parseUUID,
 			})
 			if account == (model.Account{}) {
+				// 用户不存在，返回错误并终止请求
 				response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("用户不存在").Build(ctx)
 				ctx.Abort()
+				return
 			}
+
+			// 将用户信息设置到上下文
 			ctx.Set("user_message", account)
 		}
+
+		// 继续执行后续的中间件或请求处理
 		ctx.Next()
 	}
 }

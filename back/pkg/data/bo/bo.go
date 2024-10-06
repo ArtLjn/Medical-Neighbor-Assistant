@@ -10,6 +10,11 @@ package bo
 import "github.com/go-playground/validator/v10"
 
 type LoginBo struct {
+	Phone    string `json:"phone" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
+
+type AdminLoginBo struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }

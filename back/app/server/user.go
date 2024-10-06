@@ -54,7 +54,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 	account := user.QueryUser(map[string]interface{}{
-		"username": receiver.Username,
+		"phone":    receiver.Phone,
 		"password": receiver.Password,
 	})
 	if account == (model.Account{}) {
@@ -174,7 +174,7 @@ func UpdatePhysicianInformation(ctx *gin.Context) {
 
 // AdminLoginS 管理员登录
 func AdminLoginS(ctx *gin.Context) {
-	var receiver bo.LoginBo
+	var receiver bo.AdminLoginBo
 	if err := ctx.ShouldBindJSON(&receiver); err != nil {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
@@ -197,11 +197,11 @@ func VerifyToken(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
 		return
 	}
-	if err := token.TokenF.VerifyToken(authorization); err != nil {
+	parseUUID, err := token.TokenF.VerifyToken(authorization)
+	if err != nil {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-	parseUUID := token.GetLoginName(authorization)
 	account := user.QueryUser(map[string]interface{}{
 		"uuid": parseUUID,
 	})
@@ -222,11 +222,6 @@ func LogOut(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
 		return
 	}
-	if err := token.TokenF.VerifyToken(authorization); err != nil {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
-		return
-	}
-	username := token.GetLoginName(authorization)
-	token.TokenF.LogOutToken(username)
+	token.TokenF.LogOutToken(authorization)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
 }
