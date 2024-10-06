@@ -16,6 +16,7 @@ import (
 	"back/pkg/util"
 	"errors"
 	"log"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -53,11 +54,13 @@ func WritePatientToDB(receiver [][]string) {
 		if i == 0 {
 			continue
 		}
+		a, _ := strconv.Atoi(v[4])
 		account := model.Account{
 			Username:     v[0],
 			Sex:          v[1],
 			Phone:        v[2],
 			HomeAddr:     v[3],
+			Age:          a,
 			Password:     "123456",
 			UUID:         uuid.New().String()[:8],
 			Role:         role.Patient,

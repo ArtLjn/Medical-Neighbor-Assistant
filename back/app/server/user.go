@@ -36,6 +36,7 @@ func InitUserService(group *gin.RouterGroup) {
 		userGroup.PUT("/updatePhysicianInformation", UpdatePhysicianInformation)
 		userGroup.GET("/logOut", LogOut)
 		userGroup.GET("/verifyToken", VerifyToken)
+		userGroup.GET("/queryUserMessage", QueryUserMessage)
 	}
 }
 
@@ -63,6 +64,19 @@ func Login(ctx *gin.Context) {
 	util.BeanUtil.CopyProperties(account, &responseVo)
 	responseVo.Token = token.TokenF.SaveToken(account.UUID)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(responseVo).Build(ctx)
+}
+
+// QueryUserMessage 查询用户信息
+func QueryUserMessage(ctx *gin.Context) {
+	receiverCtxUser, exists := ctx.Get("user_message")
+	userMessage, ok := receiverCtxUser.(model.Account)
+	if !exists || !ok {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	var queryResponse vo.LoginResponseVo
+	util.BeanUtil.CopyProperties(userMessage, &queryResponse)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(queryResponse).Build(ctx)
 }
 
 // UploadUserMessage 批量导入用户信息

@@ -17,7 +17,6 @@ type LoginBo struct {
 // CreateInquiryBo 创建问诊记录
 type CreateInquiryBo struct {
 	Patient         string `json:"patient"`
-	Sex             string `json:"sex"`
 	Type            string `json:"type" validate:"required"`
 	InquiryDetail   string `json:"inquiry_detail" validate:"required"`
 	ReservedPhone   string `json:"reserved_phone" validate:"required"`
@@ -45,6 +44,7 @@ type MedicalUploadBo struct {
 	BindInquiryID         int    `json:"bind_inquiry_id"  validate:"required"`
 	InquiryVideo          string `json:"inquiry_video" validate:"required"`
 	MedicalImg            string `json:"medical_img" validate:"required"`
+	IsNeedByDrug          bool   `json:"is_need_by_drug"  validate:"required"`
 }
 
 func Validate(i interface{}) error {

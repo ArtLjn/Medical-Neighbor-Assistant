@@ -19,6 +19,7 @@ type Account struct {
 	ChainAccount string `json:"chain_account" gorm:"type:varchar(255);comment:区块链账户地址"` // 区块链账户地址
 	HomeAddr     string `json:"home_addr" gorm:"type:varchar(255);comment:家庭地址"`        // 家庭地址
 	Nickname     string `json:"nickname" gorm:"type:varchar(255);comment:昵称"`           // 昵称
+	Age          int    `json:"age" gorm:"type:int;comment:年龄"`                         //年龄
 }
 
 type Drug struct {
@@ -27,7 +28,8 @@ type Drug struct {
 	Physician   string `json:"physician" gorm:"type:varchar(255);comment:医师姓名"`   // 医师姓名
 	Hospital    string `json:"hospital" gorm:"type:varchar(255);comment:医院名称"`    // 医院名称
 	CreateTime  string `json:"create_time" gorm:"type:varchar(255);comment:创建时间"` // 创建时间
-	BindMedical int    `json:"bind_medical" gorm:"comment:绑定病历"`                  // 绑定病历
+	BindMedical uint   `json:"bind_medical" gorm:"comment:绑定病历"`                  // 绑定病历
+	AlreadyBuy  bool   `json:"already_buy" gorm:"type:tinyint(1);comment:是否已经购买"` // 是否已经购买
 }
 
 type DrugDelivery struct {
@@ -45,17 +47,17 @@ type Inquiry struct {
 	Physician       string `json:"physician" gorm:"type:varchar(255);comment:指派医师"`        // 指派医师
 	Type            string `json:"type" gorm:"type:varchar(20);comment:类型"`                // 类型
 	InquiryDetail   string `json:"inquiry_detail" gorm:"type:text;comment:问诊描述"`           // 问诊描述
-	Sex             string `json:"sex" gorm:"type:varchar(20);comment:性别"`                 // 性别
 	IsInquiry       bool   `json:"is_inquiry" gorm:"type:tinyint(1);comment:是否已经问诊"`       // 是否已经问诊
 	IsReception     bool   `json:"is_reception" gorm:"type:tinyint(1);comment:是否已经接诊"`     // 是否已经接诊
 }
 
 type Medical struct {
-	ID                    uint   `json:"id" gorm:"primaryKey;autoIncrement;not null"`          // 自增主键
-	DiagnosticDescription string `json:"diagnostic_description" gorm:"type:text;comment:诊断描述"` // 诊断描述
-	BindInquiryID         int    `json:"bind_inquiry_id" gorm:"comment:绑定问诊登记ID"`              // 绑定问诊登记ID
-	InquiryVideo          string `json:"inquiry_video" gorm:"type:varchar(255);comment:问诊视频"`  // 问诊视频
-	MedicalImg            string `json:"medical_img" gorm:"type:varchar(255);comment:病历图片"`    // 病历图片
+	ID                    uint   `json:"id" gorm:"primaryKey;autoIncrement;not null"`           // 自增主键
+	DiagnosticDescription string `json:"diagnostic_description" gorm:"type:text;comment:诊断描述"`  // 诊断描述
+	BindInquiryID         int    `json:"bind_inquiry_id" gorm:"comment:绑定问诊登记ID"`               // 绑定问诊登记ID
+	InquiryVideo          string `json:"inquiry_video" gorm:"type:varchar(255);comment:问诊视频"`   // 问诊视频
+	MedicalImg            string `json:"medical_img" gorm:"type:varchar(255);comment:病历图片"`     // 病历图片
+	IsNeedByDrug          bool   `json:"is_need_by_drug" gorm:"type:tinyint(1);comment:是否需要药品"` // 是否需要药品`
 }
 
 func (a *Account) TableName() string {

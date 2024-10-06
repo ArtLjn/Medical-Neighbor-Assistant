@@ -35,7 +35,6 @@ func InitInquiryService(group *gin.RouterGroup) {
 
 // CreateInquiryRecord 创建问诊记录
 func CreateInquiryRecord(ctx *gin.Context) {
-	VerifyToken(ctx)
 	var inquiryRecord bo.CreateInquiryBo
 	receiverCtxUser, exists := ctx.Get("user_message")
 	userMessage := receiverCtxUser.(model.Account)
@@ -53,7 +52,6 @@ func CreateInquiryRecord(ctx *gin.Context) {
 	}
 	// 绑定患者信息
 	inquiryRecord.Patient = userMessage.UUID
-	inquiryRecord.Sex = userMessage.Sex
 	if err := Inquiry.CreateInquiry(inquiryRecord); err != nil {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError)
 		return
@@ -72,7 +70,6 @@ func QueryAllInquiryRecord(ctx *gin.Context) {
 
 // QueryPatientInquiryRecord 查询问诊患者记录
 func QueryPatientInquiryRecord(ctx *gin.Context) {
-	VerifyToken(ctx)
 	receiverUserMes, exists := ctx.Get("user_message")
 	userMessage := receiverUserMes.(model.Account)
 	if !exists {
@@ -87,7 +84,6 @@ func QueryPatientInquiryRecord(ctx *gin.Context) {
 
 // QueryPhysicianInquiryRecord 查询问诊医生记录
 func QueryPhysicianInquiryRecord(ctx *gin.Context) {
-	VerifyToken(ctx)
 	receiverUserMes, exists := ctx.Get("user_message")
 	userMessage := receiverUserMes.(model.Account)
 	if !exists {
@@ -142,7 +138,6 @@ func AppointPhysician(ctx *gin.Context) {
 
 // PhysicianReception  医师接诊
 func PhysicianReception(ctx *gin.Context) {
-	VerifyToken(ctx)
 	receiverUserMes, exists := ctx.Get("user_message")
 	userMessage := receiverUserMes.(model.Account)
 	if !exists {

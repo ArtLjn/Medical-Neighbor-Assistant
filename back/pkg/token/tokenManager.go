@@ -62,7 +62,7 @@ func (t *Token) VerifyToken(token string) error {
 		return fmt.Errorf("❌ token不存在")
 	}
 	if token != cacheToken {
-		log.Println("❌ token无效")
+		log.Println("❌ token不匹配")
 		return fmt.Errorf("❌ token无效")
 	}
 	return nil

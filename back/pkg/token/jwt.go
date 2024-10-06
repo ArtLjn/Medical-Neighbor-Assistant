@@ -13,7 +13,7 @@ type LoginClaims struct {
 }
 
 var (
-	signKey = "blog_key"
+	signKey = "medHealthKey"
 	letters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 

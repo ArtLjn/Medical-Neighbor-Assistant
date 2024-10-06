@@ -45,6 +45,9 @@ type OriginConfig struct {
 		Prefix     string
 		Open       bool
 	}
+	AuthorizationFilter struct {
+		NeedAuthorizationApiList []string
+	}
 }
 
 func InitConfig() *OriginConfig {
@@ -106,6 +109,11 @@ func InitConfig() *OriginConfig {
 			OutPath:    cfg.Section("log").Key("out_path").String(),
 			Prefix:     cfg.Section("log").Key("prefix").String(),
 			Open:       cfg.Section("log").Key("open").MustBool(),
+		},
+		AuthorizationFilter: struct {
+			NeedAuthorizationApiList []string
+		}{
+			NeedAuthorizationApiList: cfg.Section("authorizationFilter").Key("need_authorization_api_list").Strings(","),
 		},
 	}
 

@@ -17,12 +17,12 @@ func NewBeanUtilsImpl() *BeanUtilsImpl {
 func (b *BeanUtilsImpl) CopyProperties(itemOne interface{}, itemTwo interface{}) {
 	by, err := json.Marshal(&itemOne)
 	if err != nil {
-		fmt.Printf("json marshal error:%v", err)
+		//fmt.Printf("json marshal error:%v", err)
 		return
 	}
 	err = json.Unmarshal(by, &itemTwo)
 	if err != nil {
-		fmt.Printf("json unmarshal error:%v", err)
+		//fmt.Printf("json unmarshal error:%v", err)
 		return
 	}
 }

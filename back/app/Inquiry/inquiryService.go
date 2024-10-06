@@ -8,11 +8,14 @@
 package Inquiry
 
 import (
+	"back/app/user"
 	"back/pkg/data"
 	"back/pkg/data/bo"
 	"back/pkg/data/model"
+	"back/pkg/data/vo"
 	"back/pkg/util"
 	"log"
+	"sync"
 )
 
 func CreateInquiry(bean bo.CreateInquiryBo) error {
@@ -34,8 +37,10 @@ const (
 	Pending
 )
 
-func QueryAllInquiry(isInquiry int) []model.Inquiry {
-	var inquiry []model.Inquiry
+func QueryAllInquiry(isInquiry int) []vo.QueryInquiryVo {
+	var (
+		inquiry []model.Inquiry
+	)
 	query := data.Db
 	switch isInquiry {
 	case InquiryTrue:
@@ -55,10 +60,10 @@ func QueryAllInquiry(isInquiry int) []model.Inquiry {
 		log.Println(err)
 		return nil
 	}
-	return inquiry
+	return transferToInquiryVo(inquiry)
 }
 
-func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
+func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
 	var inquiry []model.Inquiry
 	query := data.Db.Where("physician = ?", uuid)
 	switch isInquiry {
@@ -76,10 +81,10 @@ func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
 		log.Println(err)
 		return nil
 	}
-	return inquiry
+	return transferToInquiryVo(inquiry)
 }
 
-func QueryPatientInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
+func QueryPatientInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
 	var inquiry []model.Inquiry
 	query := data.Db.Where("patient = ?", uuid)
 	switch isInquiry {
@@ -94,7 +99,7 @@ func QueryPatientInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
 		log.Println(err)
 		return nil
 	}
-	return inquiry
+	return transferToInquiryVo(inquiry)
 }
 
 func UpdateIsInquiry(id string) bool {
@@ -136,4 +141,23 @@ func QueryInquiryRecordByCond(cond map[string]interface{}) model.Inquiry {
 	}
 	query.First(&inquiry)
 	return inquiry
+}
+
+func transferToInquiryVo(receiver []model.Inquiry) []vo.QueryInquiryVo {
+	var (
+		inquiryResponse []vo.QueryInquiryVo
+		mx              sync.Mutex
+	)
+	mx.Lock()
+	defer mx.Unlock()
+	for _, v := range receiver {
+		patient := user.QueryUser(map[string]interface{}{"uuid": v.Patient})
+		physician := user.QueryUser(map[string]interface{}{"uuid": v.Physician})
+		var inquiryVo vo.QueryInquiryVo
+		util.BeanUtil.CopyProperties(v, &inquiryVo)
+		util.BeanUtil.CopyProperties(patient, &inquiryVo.Patient)
+		util.BeanUtil.CopyProperties(physician, &inquiryVo.Physician)
+		inquiryResponse = append(inquiryResponse, inquiryVo)
+	}
+	return inquiryResponse
 }

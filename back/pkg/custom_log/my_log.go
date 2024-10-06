@@ -29,8 +29,8 @@ func InitGinLog(cf *config.OriginConfig) {
 	})
 
 	// 每7天清理旧的日志文件
-	ctycle := fmt.Sprintf("0 0 0 */%d * *", cf.Log.CleanCycle)
-	_, err = c.AddFunc(ctycle, func() {
+	cycle := fmt.Sprintf("0 0 0 */%d * *", cf.Log.CleanCycle)
+	_, err = c.AddFunc(cycle, func() {
 		CleanOldFile(cf.Log.CleanCycle, cf.Log.OutPath)
 	})
 

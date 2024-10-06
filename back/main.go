@@ -10,6 +10,7 @@ package main
 import (
 	"back/app/server"
 	"back/config"
+	"back/pkg/auth"
 	"back/pkg/custom_log"
 	"back/pkg/data"
 	"back/pkg/ipfs"
@@ -56,6 +57,10 @@ func main() {
 }
 
 func registerService(r *gin.Engine) {
+	authFilterOptions := auth.NewFilterOptions(auth.WithAuthorizationFilter())
+	for _, filter := range authFilterOptions.Filters {
+		r.Use(filter.Apply())
+	}
 	publicGroup := r.Group("/api")
 	publicGroup.POST("/upload", ipfs.GinUploadImg)
 	server.InitDrugService(publicGroup)
@@ -73,4 +78,5 @@ func wireApp() {
 	if config.LoadConfig.Log.Open {
 		go custom_log.InitGinLog(config.LoadConfig)
 	}
+
 }
