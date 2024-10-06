@@ -61,7 +61,7 @@ func Login(ctx *gin.Context) {
 		return
 	}
 	util.BeanUtil.CopyProperties(account, &responseVo)
-	responseVo.Token = token.TokenF.SaveToken(receiver.Username)
+	responseVo.Token = token.TokenF.SaveToken(account.UUID)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(responseVo).Build(ctx)
 }
 
@@ -187,7 +187,18 @@ func VerifyToken(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+	parseUUID := token.GetLoginName(authorization)
+	account := user.QueryUser(map[string]interface{}{
+		"uuid": parseUUID,
+	})
+	if account == (model.Account{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("用户不存在").Build(ctx)
+		return
+	}
+	// 将 UUID 存储在请求上下文中
+	ctx.Set("uuid", parseUUID)
+	ctx.Set("user_message", account)
+	ctx.Next()
 }
 
 // LogOut 退出登录

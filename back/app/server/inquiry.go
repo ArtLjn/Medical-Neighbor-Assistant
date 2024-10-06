@@ -35,7 +35,14 @@ func InitInquiryService(group *gin.RouterGroup) {
 
 // CreateInquiryRecord 创建问诊记录
 func CreateInquiryRecord(ctx *gin.Context) {
+	VerifyToken(ctx)
 	var inquiryRecord bo.CreateInquiryBo
+	receiverCtxUser, exists := ctx.Get("user_message")
+	userMessage := receiverCtxUser.(model.Account)
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
 	if err := ctx.ShouldBindJSON(&inquiryRecord); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return
@@ -43,7 +50,11 @@ func CreateInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 		// TODO 区块链预留位置
-	} else if err = Inquiry.CreateInquiry(inquiryRecord); err != nil {
+	}
+	// 绑定患者信息
+	inquiryRecord.Patient = userMessage.UUID
+	inquiryRecord.Sex = userMessage.Sex
+	if err := Inquiry.CreateInquiry(inquiryRecord); err != nil {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError)
 		return
 	}
@@ -61,28 +72,32 @@ func QueryAllInquiryRecord(ctx *gin.Context) {
 
 // QueryPatientInquiryRecord 查询问诊患者记录
 func QueryPatientInquiryRecord(ctx *gin.Context) {
-	name := ctx.Query("name")
-	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
-	isInquiry, _ := strconv.Atoi(isInquiryStr)
-	if name == "" {
+	VerifyToken(ctx)
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
+	isInquiry, _ := strconv.Atoi(isInquiryStr)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
-		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(name, isInquiry)).Build(ctx)
+		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(userMessage.UUID, isInquiry)).Build(ctx)
 }
 
 // QueryPhysicianInquiryRecord 查询问诊医生记录
 func QueryPhysicianInquiryRecord(ctx *gin.Context) {
-	name := ctx.Query("name")
-	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
-	isInquiry, _ := strconv.Atoi(isInquiryStr)
-	if name == "" {
+	VerifyToken(ctx)
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
+	isInquiry, _ := strconv.Atoi(isInquiryStr)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
-		SetData(Inquiry.QueryPhysicianInquiryRecord(name, isInquiry)).Build(ctx)
+		SetData(Inquiry.QueryPhysicianInquiryRecord(userMessage.UUID, isInquiry)).Build(ctx)
 }
 
 // ApproveInquiryRecord 审批问诊记录
@@ -102,14 +117,14 @@ func ApproveInquiryRecord(ctx *gin.Context) {
 // AppointPhysician 指派医生
 func AppointPhysician(ctx *gin.Context) {
 	id := ctx.Query("id")
-	name := ctx.Query("name")
-	if id == "" || name == "" {
+	userUUID := ctx.Query("userUUID")
+	if id == "" || userUUID == "" {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
 	if user.QueryUser(map[string]interface{}{
-		"username": name,
-		"role":     role.Physician,
+		"uuid": userUUID,
+		"role": role.Physician,
 	}) == (model.Account{}) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
 		return
@@ -118,7 +133,7 @@ func AppointPhysician(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录已被接诊").Build(ctx)
 		return
 	}
-	if err := Inquiry.UpdateInquiryPhysician(id, name); err != nil {
+	if err := Inquiry.UpdateInquiryPhysician(id, userUUID); err != nil {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
@@ -127,6 +142,13 @@ func AppointPhysician(ctx *gin.Context) {
 
 // PhysicianReception  医师接诊
 func PhysicianReception(ctx *gin.Context) {
+	VerifyToken(ctx)
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
 	id := ctx.Query("id")
 	isReceptionStr := ctx.Query("isReception")
 	isReception, _ := strconv.ParseBool(isReceptionStr)
@@ -134,6 +156,18 @@ func PhysicianReception(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+
+	inquiryRecord := Inquiry.QueryInquiryRecordByCond(map[string]interface{}{"id": id})
+	if inquiryRecord == (model.Inquiry{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
+		return
+	}
+	// 判断是否是该医生
+	if userMessage.UUID != inquiryRecord.Physician {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("并未指派您进行接单").Build(ctx)
+		return
+	}
+
 	if !Inquiry.UpdateIsReception(id, isReception) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return

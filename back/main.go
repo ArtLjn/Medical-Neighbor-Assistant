@@ -14,8 +14,9 @@ import (
 	"back/pkg/data"
 	"back/pkg/ipfs"
 	"back/pkg/token"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -24,7 +25,6 @@ var (
 
 func main() {
 	r := gin.Default()
-	go custom_log.InitGinLog("MediaNeighbor")
 	wireApp()
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
@@ -69,4 +69,8 @@ func wireApp() {
 	data.Db = data.NewDB()
 	data.Rdb = data.NewRDB()
 	token.TokenF = token.NewToken(data.Rdb)
+	// 开启日志输出服务
+	if config.LoadConfig.Log.Open {
+		go custom_log.InitGinLog(config.LoadConfig)
+	}
 }

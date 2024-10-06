@@ -58,9 +58,9 @@ func QueryAllInquiry(isInquiry int) []model.Inquiry {
 	return inquiry
 }
 
-func QueryPhysicianInquiryRecord(name string, isInquiry int) []model.Inquiry {
+func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
 	var inquiry []model.Inquiry
-	query := data.Db.Where("physician = ?", name)
+	query := data.Db.Where("physician = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
@@ -79,16 +79,16 @@ func QueryPhysicianInquiryRecord(name string, isInquiry int) []model.Inquiry {
 	return inquiry
 }
 
-func QueryPatientInquiryRecord(name string, isInquiry int) []model.Inquiry {
+func QueryPatientInquiryRecord(uuid string, isInquiry int) []model.Inquiry {
 	var inquiry []model.Inquiry
-	query := data.Db.Where("patient = ?", name)
+	query := data.Db.Where("patient = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
 	case InquiryFalse:
 		query = query.Where("is_inquiry = ?", false)
 	default:
-		return nil
+
 	}
 	if err := query.Find(&inquiry).Error; err != nil {
 		log.Println(err)
@@ -126,4 +126,14 @@ func IsReception(id string) bool {
 		return false
 	}
 	return inquiry.IsReception
+}
+
+func QueryInquiryRecordByCond(cond map[string]interface{}) model.Inquiry {
+	var inquiry model.Inquiry
+	query := data.Db.Model(&model.Inquiry{})
+	for k, v := range cond {
+		query = query.Where(k, v)
+	}
+	query.First(&inquiry)
+	return inquiry
 }

@@ -8,34 +8,35 @@
 package custom_log
 
 import (
+	"back/config"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/robfig/cron/v3"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
-const LogOutStreamPath = "log"
-
-func InitGinLog(prefix string) {
+func InitGinLog(cf *config.OriginConfig) {
 	c := cron.New(cron.WithSeconds())
-	go CleanOldFile(7, LogOutStreamPath)
+	go CleanOldFile(cf.Log.CleanCycle, cf.Log.OutPath)
 	// 每天创建新的日志文件
 	_, err := c.AddFunc("0 0 0 * * *", func() {
-		initGinLog(prefix)
+		initGinLog(cf)
 	})
 
 	// 每7天清理旧的日志文件
-	_, err = c.AddFunc("0 0 0 */7 * *", func() {
-		CleanOldFile(7, LogOutStreamPath)
+	ctycle := fmt.Sprintf("0 0 0 */%d * *", cf.Log.CleanCycle)
+	_, err = c.AddFunc(ctycle, func() {
+		CleanOldFile(cf.Log.CleanCycle, cf.Log.OutPath)
 	})
 
 	// 开始定时任务
 	c.Start()
-	initGinLog(prefix)
+	initGinLog(cf)
 	if err != nil {
 		log.Fatalf("Failed to set up log file creation and cleaning: %v", err)
 	}
@@ -76,13 +77,13 @@ func CleanOldFile(retainDays int, path string) {
 	}
 }
 
-func initGinLog(prefix string) {
-	logFileName := fmt.Sprintf("%s-%s.log", time.Now().Format("2006-01-02"), prefix)
-	logPath := filepath.Join(LogOutStreamPath, logFileName)
+func initGinLog(cf *config.OriginConfig) {
+	logFileName := fmt.Sprintf("%s-%s.log", time.Now().Format("2006-01-02"), cf.Log.Prefix)
+	logPath := filepath.Join(cf.Log.OutPath, logFileName)
 
 	// 创建日志目录，如果不存在的话
-	if _, err := os.Stat(LogOutStreamPath); os.IsNotExist(err) {
-		err = os.MkdirAll(LogOutStreamPath, os.ModePerm)
+	if _, err := os.Stat(cf.Log.OutPath); os.IsNotExist(err) {
+		err = os.MkdirAll(cf.Log.OutPath, os.ModePerm)
 		if err != nil {
 			log.Fatalf("Failed to create log directory: %v", err)
 		}

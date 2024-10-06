@@ -38,6 +38,13 @@ type OriginConfig struct {
 		Password string `json:"password"`
 		Db       int    `json:"db"`
 	}
+	Log struct {
+		Level      string
+		CleanCycle int
+		OutPath    string
+		Prefix     string
+		Open       bool
+	}
 }
 
 func InitConfig() *OriginConfig {
@@ -86,6 +93,19 @@ func InitConfig() *OriginConfig {
 			Addr:     cfg.Section("redis").Key("addr").String(),
 			Password: cfg.Section("redis").Key("password").String(),
 			Db:       cfg.Section("redis").Key("db").MustInt(),
+		},
+		Log: struct {
+			Level      string
+			CleanCycle int
+			OutPath    string
+			Prefix     string
+			Open       bool
+		}{
+			Level:      cfg.Section("log").Key("level").String(),
+			CleanCycle: cfg.Section("log").Key("clean_cycle").MustInt(),
+			OutPath:    cfg.Section("log").Key("out_path").String(),
+			Prefix:     cfg.Section("log").Key("prefix").String(),
+			Open:       cfg.Section("log").Key("open").MustBool(),
 		},
 	}
 

@@ -55,6 +55,7 @@ type Medical struct {
 	DiagnosticDescription string `json:"diagnostic_description" gorm:"type:text;comment:诊断描述"` // 诊断描述
 	BindInquiryID         int    `json:"bind_inquiry_id" gorm:"comment:绑定问诊登记ID"`              // 绑定问诊登记ID
 	InquiryVideo          string `json:"inquiry_video" gorm:"type:varchar(255);comment:问诊视频"`  // 问诊视频
+	MedicalImg            string `json:"medical_img" gorm:"type:varchar(255);comment:病历图片"`    // 病历图片
 }
 
 func (a *Account) TableName() string {
