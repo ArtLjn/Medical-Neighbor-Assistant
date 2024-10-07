@@ -50,12 +50,11 @@ func CreateInquiryRecord(ctx *gin.Context) {
 	} else if err = bo.Validate(inquiryRecord); err != nil {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
-		// TODO 区块链预留位置
 	}
 	// 绑定患者信息
 	inquiryRecord.Patient = userMessage.UUID
-	if err := Inquiry.CreateInquiry(inquiryRecord); err != nil {
-		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError)
+	if err := Inquiry.CreateInquiry(userMessage.ChainAccount, inquiryRecord); err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
 	response.PublicResponse.NewBuildSuccess(ctx)
@@ -130,8 +129,8 @@ func ApproveInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录未生成医疗记录").Build(ctx)
 		return
 	}
-	if !Inquiry.UpdateIsInquiry(id) {
-		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+	if err := Inquiry.UpdateIsInquiry(id); err != nil {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
 	response.PublicResponse.NewBuildSuccess(ctx)
@@ -190,8 +189,8 @@ func PhysicianReception(ctx *gin.Context) {
 		return
 	}
 
-	if !Inquiry.UpdateIsReception(id, isReception) {
-		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+	if err := Inquiry.UpdateIsReception(userMessage.ChainAccount, id, isReception); err != nil {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
 	response.PublicResponse.NewBuildSuccess(ctx)

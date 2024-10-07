@@ -18,6 +18,7 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"strconv"
+	"sync"
 )
 
 func QueryUser(cond map[string]interface{}) model.Account {
@@ -43,7 +44,10 @@ func QueryAllPhysician() []model.Account {
 }
 
 func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
-	var accounts []model.Account
+	var (
+		accounts []model.Account
+		mx       sync.Mutex
+	)
 
 	for i, v := range receiver {
 		if i == 0 {
@@ -51,13 +55,12 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 		}
 
 		account := model.Account{
-			Username:     v[0],
-			Sex:          v[1],
-			Phone:        v[2],
-			Password:     "123456",
-			UUID:         uuid.New().String()[:8],
-			Role:         roleType,
-			ChainAccount: util.GenerateAccount()["address"],
+			Username: v[0],
+			Sex:      v[1],
+			Phone:    v[2],
+			Password: "123456",
+			UUID:     uuid.New().String()[:8],
+			Role:     roleType,
 		}
 
 		if isPhysician {
@@ -73,12 +76,31 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 		accounts = append(accounts, account)
 	}
 
-	if len(accounts) > 0 {
-		err := data.Db.Create(&accounts).Error
-		if err != nil {
-			log.Println("Error while inserting accounts:", err)
+	go func() {
+		mx.Lock()
+		for _, v := range accounts {
+			if err := data.Db.Create(&v).Error; err != nil {
+				log.Println("Error while inserting accounts:", err)
+				continue
+			}
+			currentAddress, err := util.GenerateHttpAccount(v.UUID)
+			if err != nil {
+				log.Println("Error while generating account:", err)
+				continue
+			}
+			v.ChainAccount = currentAddress
+			if err = data.Db.Model(&v).Updates(v).Error; err != nil {
+				log.Println("Error while updating account:", err)
+				continue
+			}
+			util.IsSuccess(util.CommonEq("registerAccount", []interface{}{
+				v.ChainAccount,
+				roleType,
+				v.UUID,
+			}))
 		}
-	}
+		mx.Unlock()
+	}()
 }
 
 // WritePatientToDB  写入患者数据

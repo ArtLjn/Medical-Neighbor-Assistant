@@ -23,6 +23,7 @@ import (
 func InitGinLog(cf *config.OriginConfig) {
 	c := cron.New(cron.WithSeconds())
 	go CleanOldFile(cf.Log.CleanCycle, cf.Log.OutPath)
+
 	// 每天创建新的日志文件
 	_, err := c.AddFunc("0 0 0 * * *", func() {
 		initGinLog(cf)
@@ -44,13 +45,9 @@ func InitGinLog(cf *config.OriginConfig) {
 
 // CleanOldFile 清理指定天数之前的日志文件
 func CleanOldFile(retainDays int, path string) {
-	// 获取当前时间
 	now := time.Now()
-
-	// 计算保留的截止日期
 	cutoff := now.AddDate(0, 0, -retainDays)
 
-	// 读取日志目录中的所有文件
 	files, err := os.ReadDir(path)
 	if err != nil {
 		log.Printf("Error reading log directory: %v", err)
@@ -58,12 +55,9 @@ func CleanOldFile(retainDays int, path string) {
 	}
 
 	for _, file := range files {
-		// 检查文件是否是日志文件
 		if !file.IsDir() {
-			// 获取文件的修改时间
 			fileInfo, _ := file.Info()
 			modTime := fileInfo.ModTime()
-			// 如果文件的修改时间早于截止日期，则删除该文件
 			if modTime.Before(cutoff) {
 				filePath := filepath.Join(path, file.Name())
 				err = os.Remove(filePath)
@@ -76,12 +70,16 @@ func CleanOldFile(retainDays int, path string) {
 		}
 	}
 }
-
 func initGinLog(cf *config.OriginConfig) {
+	// 创建日志文件名
 	logFileName := fmt.Sprintf("%s-%s.log", time.Now().Format("2006-01-02"), cf.Log.Prefix)
-	logPath := filepath.Join(cf.Log.OutPath, logFileName)
+	errorLogFileName := fmt.Sprintf("%s-%s-error.log", time.Now().Format("2006-01-02"), cf.Log.Prefix)
 
-	// 创建日志目录，如果不存在的话
+	// 定义日志文件路径
+	logPath := filepath.Join(cf.Log.OutPath, logFileName)
+	errorLogPath := filepath.Join(cf.Log.OutPath, errorLogFileName)
+
+	// 创建日志目录
 	if _, err := os.Stat(cf.Log.OutPath); os.IsNotExist(err) {
 		err = os.MkdirAll(cf.Log.OutPath, os.ModePerm)
 		if err != nil {
@@ -89,12 +87,32 @@ func initGinLog(cf *config.OriginConfig) {
 		}
 	}
 
-	f, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	// 打开日志文件
+	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalf("Failed to open log file: %v", err)
 	}
+
+	// 打开错误日志文件
+	errorLogFile, err := os.OpenFile(errorLogPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open error log file: %v", err)
+	}
+
+	// 设置 gin 的日志输出
 	gin.SetMode(gin.ReleaseMode)
 	gin.DisableConsoleColor()
-	log.SetOutput(f)
-	gin.DefaultWriter = io.MultiWriter(f)
+	gin.DefaultWriter = io.MultiWriter(logFile, os.Stdout) // 普通日志输出到 logFile 和控制台
+
+	// 设置普通日志
+	normalLogger := log.New(io.MultiWriter(logFile, os.Stdout), "INFO: ", log.LstdFlags|log.Lshortfile)
+
+	// 设置错误日志
+	errorLogger := log.New(io.MultiWriter(errorLogFile, os.Stdout), "ERROR: ", log.LstdFlags|log.Lshortfile)
+
+	// 这里的普通日志可以通过 normalLogger.Println() 打印
+	normalLogger.Println("Gin log initialized")
+
+	// 这里的错误日志可以通过 errorLogger.Println() 打印
+	errorLogger.Println("This is an error log")
 }

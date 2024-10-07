@@ -13,6 +13,7 @@ import (
 	"back/pkg/data"
 	"back/pkg/data/model"
 	"back/pkg/response"
+	"back/pkg/util"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -26,7 +27,7 @@ func InitDrugService(group *gin.RouterGroup) {
 		drugGroup.GET("/queryPatientAgentDrugHistory", QueryPatientAgentDrugHistory)
 		drugGroup.GET("/queryPhysiciansAgentHistoryRecord", QueryPhysiciansAgentHistoryRecord)
 		drugGroup.GET("/queryDrugByID", QueryDrugByID)
-		drugGroup.POST("/patientAgentDrugConfirmReceipt", PatientAgentDrugConfirmReceipt)
+		drugGroup.POST("/hospitalAgentDrugConfirmReceipt", HospitalAgentDrugConfirmReceipt)
 		drugGroup.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
 		drugGroup.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
 	}
@@ -112,30 +113,29 @@ func queryDrugRecord(raw, cond, val string) ([]model.Drug, error) {
 	return drugList, nil
 }
 
-// PatientAgentDrugConfirmReceipt 患者代买药品确认收货
-func PatientAgentDrugConfirmReceipt(ctx *gin.Context) {
-	receiverUserMes, exists := ctx.Get("user_message")
-	userMessage := receiverUserMes.(model.Account)
-	if !exists {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
-		return
-	}
+// HospitalAgentDrugConfirmReceipt 医院管理人员审核药品代买情况
+func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
 	id := ctx.Query("id")
 	if id == "" {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
 	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
-		"id":      id,
-		"patient": userMessage.UUID,
+		"id": id,
 	})
 	if drugRecord != (model.Drug{}) && drugRecord.IsReceive {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Already receive").Build(ctx)
 		return
 	}
+	r, e := util.IsSuccessMsg(util.CommonEq(
+		"hospitalReviewDrugDelivery", []interface{}{id}))
+	if !r && e != nil {
+		log.Println(e)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(e.Error()).Build(ctx)
+		return
+	}
 	if err := drug.UpdateDrugRecord(map[string]interface{}{
-		"id":      id,
-		"patient": userMessage.UUID,
+		"id": id,
 	}, map[string]interface{}{
 		"is_receive": true,
 	}); err != nil {
@@ -167,6 +167,13 @@ func PhysiciansOrderAgentDrug(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Already buy").Build(ctx)
 		return
 	}
+	r, e := util.IsSuccessMsg(util.CommonEqByUser(userMessage.ChainAccount,
+		"physicianAcceptDrugDelivery", []interface{}{id}))
+	if !r && e != nil {
+		log.Println(e)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(e.Error()).Build(ctx)
+		return
+	}
 	if err := drug.UpdateDrugRecord(map[string]interface{}{
 		"id":        id,
 		"physician": userMessage.UUID,
@@ -192,6 +199,13 @@ func PhysiciansOrderDelivery(ctx *gin.Context) {
 	certificate := ctx.Query("certificate")
 	if id == "" {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	r, e := util.IsSuccessMsg(util.CommonEqByUser(userMessage.ChainAccount,
+		"physicianDeliveryDrug", []interface{}{id, certificate}))
+	if !r && e != nil {
+		log.Println(e)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(e.Error()).Build(ctx)
 		return
 	}
 	if err := drug.UpdateDrugRecord(map[string]interface{}{

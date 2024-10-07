@@ -14,20 +14,59 @@ import (
 	"back/pkg/data/model"
 	"back/pkg/data/vo"
 	"back/pkg/util"
+	"fmt"
 	"log"
 	"sync"
 )
 
-func CreateInquiry(bean bo.CreateInquiryBo) error {
+const (
+	FamilyMedicalTreatment    = "家庭就医"
+	CommunityMedicalTreatment = "社区就医"
+)
+
+func CreateInquiry(chainAccount string, bean bo.CreateInquiryBo) error {
 	var inquiry model.Inquiry
 	util.BeanUtil.CopyProperties(bean, &inquiry)
 	inquiry.IsInquiry = false
 	inquiry.IsReception = false
-	return data.Db.Create(&inquiry).Error
+	if err := data.Db.Create(&inquiry).Error; err != nil {
+		log.Println(err)
+		return fmt.Errorf("create inquiry failed")
+	}
+	_, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount, "patientRegistrationInquiry", []interface{}{
+		inquiry.ID,
+		FamilyMedicalTreatment,
+	}))
+	if e != nil {
+		data.Db.Delete(&inquiry)
+		log.Println(e)
+		return e
+	}
+
+	return nil
 }
 
 func UpdateInquiryPhysician(id, name string) error {
-	return data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("physician", name).Error
+	var inquiry model.Inquiry
+	if err := data.Db.Where("id = ?", id).First(&inquiry).Error; err != nil {
+		log.Println(err)
+		return fmt.Errorf("update inquiry failed")
+	}
+	account := user.QueryUser(map[string]interface{}{"uuid": name})
+	if account == (model.Account{}) {
+		return fmt.Errorf("physician not found")
+	}
+	r, e := util.IsSuccessMsg(util.CommonEq("hospitalDisInquiry", []interface{}{id, account.ChainAccount}))
+	if !r && e != nil {
+		log.Println(e)
+		return e
+	}
+	inquiry.Physician = name
+	if err := data.Db.Updates(&inquiry).Error; err != nil {
+		log.Println(err)
+		return fmt.Errorf("update inquiry failed")
+	}
+	return nil
 }
 
 const (
@@ -102,26 +141,36 @@ func QueryPatientInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
 	return transferToInquiryVo(inquiry)
 }
 
-func UpdateIsInquiry(id string) bool {
+func UpdateIsInquiry(id string) error {
+	r, e := util.IsSuccessMsg(util.CommonEq("hospitalReviewInquiry", []interface{}{id}))
+	if !r && e != nil {
+		log.Println(e)
+		return e
+	}
 	if err := data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("is_inquiry", true).Error; err != nil {
 		log.Println(err)
-		return false
+		return fmt.Errorf("update inquiry failed")
 	}
-	return true
+	return nil
 }
 
-func UpdateIsReception(id string, isReception bool) bool {
+func UpdateIsReception(chainAccount, id string, isReception bool) error {
 	if !isReception {
 		if err := data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("physician", "").Error; err != nil {
 			log.Println(err)
-			return false
+			return fmt.Errorf("update inquiry failed")
 		}
+	}
+	r, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount, "physicianRecInquiry", []interface{}{id}))
+	if !r && e != nil {
+		log.Println(e)
+		return e
 	}
 	if err := data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("is_reception", isReception).Error; err != nil {
 		log.Println(err)
-		return false
+		return fmt.Errorf("update inquiry failed")
 	}
-	return true
+	return nil
 }
 
 func IsReception(id string) bool {

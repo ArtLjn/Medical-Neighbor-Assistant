@@ -9,14 +9,16 @@ package server
 
 import (
 	"back/app/Inquiry"
-	"back/app/drug"
 	"back/app/medical"
 	"back/app/user"
 	"back/pkg/custom_error"
+	"back/pkg/data"
 	"back/pkg/data/bo"
 	"back/pkg/data/model"
 	"back/pkg/response"
+	"back/pkg/util"
 	"github.com/gin-gonic/gin"
+	"log"
 	"time"
 )
 
@@ -47,6 +49,12 @@ func QueryMedialRecordInformation(ctx *gin.Context) {
 
 // MedicalRegistration 就诊登记
 func MedicalRegistration(ctx *gin.Context) {
+	receiverCtxUser, exists := ctx.Get("user_message")
+	userMessage, ok := receiverCtxUser.(model.Account)
+	if !exists || !ok {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
 	var receiver bo.MedicalUploadBo
 	if err := ctx.ShouldBindJSON(&receiver); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
@@ -66,11 +74,14 @@ func MedicalRegistration(ctx *gin.Context) {
 	} else if inquiryRecord.IsInquiry {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("已经问诊完成，无需在进行登记").Build(ctx)
 		return
+	} else if medical.QueryMedicalByCond(map[string]interface{}{"bind_inquiry_id": receiver.BindInquiryID}) != (model.Medical{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("已经登记过病历").Build(ctx)
+		return
 	}
 	// 创建病历
-	medicalId, err := medical.CreateMedical(receiver)
+	medicalId, err := medical.CreateMedical(receiver, userMessage.ChainAccount)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
 
@@ -86,7 +97,10 @@ func MedicalRegistration(ctx *gin.Context) {
 		physicianMessage := user.QueryUser(map[string]interface{}{
 			"uuid": inquiryMsg.Physician,
 		})
-		if physicianMessage == (model.Account{}) {
+		patientMessage := user.QueryUser(map[string]interface{}{
+			"uuid": inquiryMsg.Patient,
+		})
+		if physicianMessage == (model.Account{}) || patientMessage == (model.Account{}) {
 			response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
 			return
 		}
@@ -100,8 +114,18 @@ func MedicalRegistration(ctx *gin.Context) {
 			AlreadyBuy:  false,
 			IsReceive:   false,
 		}
-		if err = drug.CreateDrugTask(drugReceiver); err != nil {
-			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg("创建代购药品失败").Build(ctx)
+		if err = data.Db.Create(&drugReceiver).Error; err != nil {
+			log.Println(err)
+			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg("创建失败").Build(ctx)
+			return
+		}
+		// 患者登记药品代买信息写入区块链
+		r, e := util.IsSuccessMsg(util.CommonEqByUser(patientMessage.ChainAccount, "patientRegDrugDelivery", []interface{}{
+			drugReceiver.ID,
+			receiver.BindInquiryID,
+		}))
+		if !r && e != nil {
+			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(e.Error()).Build(ctx)
 			return
 		}
 	}

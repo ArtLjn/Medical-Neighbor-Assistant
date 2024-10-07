@@ -30,8 +30,8 @@ var (
 )
 
 func main() {
-	r := gin.Default()
 	wireApp()
+	r := gin.Default()
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,

@@ -46,6 +46,16 @@ type OriginConfig struct {
 		Password string `yaml:"password"`
 		Db       int    `yaml:"db"`
 	} `yaml:"redis"`
+	Contract struct {
+		ContractName    string `yaml:"contract_name"`
+		ContractAddress string `yaml:"contract_address"`
+		ContractAbi     string `yaml:"contract_abi"`
+		Owner           string `yaml:"owner"`
+		TransUrl        string `yaml:"trans_url"`
+		ParseUrl        string `yaml:"parse_url"`
+		AccountUrl      string `yaml:"account_url"`
+		ServerHost      string `yaml:"server_host"`
+	}
 	Log struct {
 		Level      string `yaml:"level"`
 		CleanCycle int    `yaml:"clean_cycle"`
@@ -58,8 +68,12 @@ type OriginConfig struct {
 	} `yaml:"authorizationFilter"`
 }
 
-func InitConfig() *OriginConfig {
-	data, err := ioutil.ReadFile("/Users/ljn/Documents/blockchaincomplete/Internet+/back/config/config.yaml")
+func InitConfig(p ...string) *OriginConfig {
+	path := "./config/config.yaml"
+	if len(p) > 0 {
+		path = p[0]
+	}
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)

@@ -60,6 +60,11 @@ func Login(ctx *gin.Context) {
 	if account == (model.Account{}) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
 		return
+	} else if len(util.CommonEq("getAccount", []interface{}{
+		account.ChainAccount,
+	})) == 0 {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
+		return
 	}
 	util.BeanUtil.CopyProperties(account, &responseVo)
 	responseVo.Token = token.TokenF.SaveToken(account.UUID)

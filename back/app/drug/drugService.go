@@ -12,10 +12,6 @@ import (
 	"back/pkg/data/model"
 )
 
-func CreateDrugTask(receiver model.Drug) error {
-	return data.Db.Create(&receiver).Error
-}
-
 func QueryDrugRecord(cond map[string]interface{}) model.Drug {
 	query := data.Db
 	for k, v := range cond {

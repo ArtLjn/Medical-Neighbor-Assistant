@@ -8,10 +8,16 @@
 package util
 
 import (
+	"back/config"
 	"crypto/ecdsa"
+	"fmt"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/thedevsaddam/gojsonq"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 )
 
 func GenerateAccount() map[string]string {
@@ -38,4 +44,39 @@ func GenerateAccount() map[string]string {
 		"privateKey": hexutil.Encode(privateKeyBytes)[2:],
 	}
 	return data
+}
+
+func GenerateHttpAccount(username string) (string, error) {
+	c := config.LoadConfig.Contract
+	// 对用户名进行 URL 编码
+	encodedUsername := url.QueryEscape(username)
+	uri := fmt.Sprintf("%s%s%s", c.ServerHost, c.AccountUrl, encodedUsername)
+
+	req, err := http.NewRequest(http.MethodGet, uri, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("http status code: %d", resp.StatusCode)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	address, ok := gojsonq.New().JSONString(string(body)).Find("address").(string)
+	if !ok {
+		return "", fmt.Errorf("address not found")
+	}
+
+	return address, nil
 }

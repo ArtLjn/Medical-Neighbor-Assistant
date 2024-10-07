@@ -12,15 +12,23 @@ import (
 	"back/pkg/data/bo"
 	"back/pkg/data/model"
 	"back/pkg/util"
+	"fmt"
 )
 
-func CreateMedical(receiver bo.MedicalUploadBo) (uint, error) {
+func CreateMedical(receiver bo.MedicalUploadBo, account string) (uint, error) {
 	var medical model.Medical
 	util.BeanUtil.CopyProperties(receiver, &medical)
-	// TODO 区块链预留位置
+	r, e := util.IsSuccessMsg(util.CommonEqByUser(account, "physicianDiagnosisInquiry", []interface{}{
+		receiver.BindInquiryID,
+		receiver.MedicalImg,
+		receiver.InquiryVideo,
+	}))
+	if !r && e != nil {
+		return 0, e
+	}
 	err := data.Db.Create(&medical).Error
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("create medical error: %v", err)
 	}
 	return medical.ID, nil
 }
