@@ -4,13 +4,12 @@ require (
 	github.com/ethereum/go-ethereum v1.14.11
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0
-	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.3.0
 	github.com/ipfs/go-ipfs-api v0.7.0
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/xuri/excelize/v2 v2.8.1
-	gopkg.in/ini.v1 v1.67.0
+	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
 )

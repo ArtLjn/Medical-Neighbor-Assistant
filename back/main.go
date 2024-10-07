@@ -15,9 +15,14 @@ import (
 	"back/pkg/data"
 	"back/pkg/ipfs"
 	"back/pkg/token"
-	"net/http"
-
+	"context"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
 )
 
 var (
@@ -33,27 +38,11 @@ func main() {
 	}
 	// 注册相关服务
 	registerService(r)
-	r.Run(srv.Addr)
-	//go func() {
-	//	// 服务连接
-	//	if err := srv.ListenAndServe(); !(err == nil || errors.Is(err, http.ErrServerClosed)) {
-	//		log.Fatalf("listen: %s\n", err)
-	//	}
-	//}()
-	//
-	//// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
-	//quit := make(chan os.Signal, 1)
-	//signal.Notify(quit, os.Interrupt)
-	//<-quit
-	//log.Println("Shutdown Server ...")
-	//
-	//ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-	//<-finish
-	//defer cancel()
-	//if err := srv.Shutdown(ctx); err != nil {
-	//	log.Fatal("Server Shutdown:", err)
-	//}
-	//log.Println("Server exiting")
+	err := r.Run(srv.Addr)
+	if err != nil {
+		return
+	}
+	//graceStop(srv)
 }
 
 func registerService(r *gin.Engine) {
@@ -78,5 +67,29 @@ func wireApp() {
 	if config.LoadConfig.Log.Open {
 		go custom_log.InitGinLog(config.LoadConfig)
 	}
+}
 
+// 优雅关闭服务器
+func graceStop(srv *http.Server) {
+	go func() {
+		// 服务连接
+		if err := srv.ListenAndServe(); !(err == nil || errors.Is(err, http.ErrServerClosed)) {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+	log.Println("Shutdown Server ...")
+	log.Println("Clear Cache TokenManager ...", data.Rdb.Del(context.Background(), token.TokenMangerKey).Err())
+	// 关闭服务器
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	<-finish
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
+	}
+	log.Println("Server exiting")
 }

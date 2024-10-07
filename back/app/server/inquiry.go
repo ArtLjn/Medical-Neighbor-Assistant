@@ -9,6 +9,7 @@ package server
 
 import (
 	"back/app/Inquiry"
+	"back/app/medical"
 	"back/app/user"
 	"back/pkg/custom_error"
 	"back/pkg/data/bo"
@@ -112,6 +113,21 @@ func ApproveInquiryRecord(ctx *gin.Context) {
 	id := ctx.Query("id")
 	if id == "" {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	inquiryRecord := Inquiry.QueryInquiryRecordByCond(map[string]interface{}{"id": id})
+	if !inquiryRecord.IsReception {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录未被接诊").Build(ctx)
+		return
+	} else if inquiryRecord.IsInquiry {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录已经问诊结束").Build(ctx)
+		return
+	}
+	medicalRecord := medical.QueryMedicalByCond(map[string]interface{}{
+		"bind_inquiry_id": id,
+	})
+	if medicalRecord == (model.Medical{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录未生成医疗记录").Build(ctx)
 		return
 	}
 	if !Inquiry.UpdateIsInquiry(id) {

@@ -7,46 +7,218 @@
 
 package server
 
-import "github.com/gin-gonic/gin"
+import (
+	"back/app/drug"
+	"back/pkg/custom_error"
+	"back/pkg/data"
+	"back/pkg/data/model"
+	"back/pkg/response"
+	"errors"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"log"
+)
 
 func InitDrugService(group *gin.RouterGroup) {
-	drug := group.Group("/drug")
+	drugGroup := group.Group("/drug")
 	{
-		drug.GET("/queryPatientAgentDrugHistory", QueryPatientAgentDrugHistory)
-		drug.POST("/patientAgentDrugConfirmReceipt", PatientAgentDrugConfirmReceipt)
-		drug.GET("/queryPhysiciansAgentDrugTask", QueryPhysiciansAgentDrugTask)
-		drug.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
-		drug.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
-		drug.GET("/queryPhysiciansAgentHistoryRecord", QueryPhysiciansAgentHistoryRecord)
+		drugGroup.GET("/queryPatientAgentDrugHistory", QueryPatientAgentDrugHistory)
+		drugGroup.GET("/queryPhysiciansAgentHistoryRecord", QueryPhysiciansAgentHistoryRecord)
+		drugGroup.GET("/queryDrugByID", QueryDrugByID)
+		drugGroup.POST("/patientAgentDrugConfirmReceipt", PatientAgentDrugConfirmReceipt)
+		drugGroup.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
+		drugGroup.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
 	}
 }
 
+const (
+	DrugAlreadyBy      = "1" // 已经购买
+	DrugNotBy          = "2" // 未购买
+	AlreadyCertificate = "3" // 已经派送
+	NotCertificate     = "4" // 未派送
+	FinishDrug         = "5" // 已经完成
+)
+
 // QueryPatientAgentDrugHistory 患者查询药品代买历史记录
 func QueryPatientAgentDrugHistory(ctx *gin.Context) {
+	receiverUserMes, exists := ctx.Get("user_message")
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
 
-}
+	userMessage, ok := receiverUserMes.(model.Account)
+	if !ok {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Invalid user message").Build(ctx)
+		return
+	}
 
-// PatientAgentDrugConfirmReceipt 患者代买药品确认收货
-func PatientAgentDrugConfirmReceipt(ctx *gin.Context) {
-
-}
-
-// QueryPhysiciansAgentDrugTask 医师查询待处理的代卖药品任务
-func QueryPhysiciansAgentDrugTask(ctx *gin.Context) {
-
-}
-
-// PhysiciansOrderAgentDrug 医师接单药品代卖
-func PhysiciansOrderAgentDrug(ctx *gin.Context) {
-
-}
-
-// PhysiciansOrderDelivery 医师接单派送
-func PhysiciansOrderDelivery(ctx *gin.Context) {
-
+	raw := ctx.DefaultQuery("raw", "0")
+	drugList, err := queryDrugRecord(raw, "patient", userMessage.UUID)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
 }
 
 // QueryPhysiciansAgentHistoryRecord 医师查询代卖药品历史记录
 func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
+	receiverUserMes, exists := ctx.Get("user_message")
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
 
+	userMessage, ok := receiverUserMes.(model.Account)
+	if !ok {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Invalid user message").Build(ctx)
+		return
+	}
+
+	raw := ctx.DefaultQuery("raw", "0")
+	drugList, err := queryDrugRecord(raw, "physician", userMessage.UUID)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
+}
+
+func queryDrugRecord(raw, cond, val string) ([]model.Drug, error) {
+	query := data.Db.Model(&model.Drug{}).Where(fmt.Sprintf("%s = ?", cond), val)
+
+	switch raw {
+	case DrugAlreadyBy:
+		query = query.Where("already_buy = ?", true)
+	case DrugNotBy:
+		query = query.Where("already_buy = ?", false)
+	case AlreadyCertificate:
+		query = query.Where("delivery_certificate IS NOT NULL").Where("delivery_certificate != ''").Where("is_receive = ?", false)
+	case NotCertificate:
+		query = query.Where("already_buy = ?", true).Where("delivery_certificate = ''")
+	case FinishDrug:
+		query = query.Where("is_receive = ?", true)
+	default:
+		// 未定义或空的 `raw` 参数可以返回一个默认查询或者错误
+	}
+
+	var drugList []model.Drug
+	if err := query.Find(&drugList).Error; err != nil {
+		log.Printf("Error querying drug history for user %s: %v", val, err)
+		return nil, err
+	}
+	return drugList, nil
+}
+
+// PatientAgentDrugConfirmReceipt 患者代买药品确认收货
+func PatientAgentDrugConfirmReceipt(ctx *gin.Context) {
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	id := ctx.Query("id")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
+		"id":      id,
+		"patient": userMessage.UUID,
+	})
+	if drugRecord != (model.Drug{}) && drugRecord.IsReceive {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Already receive").Build(ctx)
+		return
+	}
+	if err := drug.UpdateDrugRecord(map[string]interface{}{
+		"id":      id,
+		"patient": userMessage.UUID,
+	}, map[string]interface{}{
+		"is_receive": true,
+	}); err != nil {
+		log.Println(err)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+// PhysiciansOrderAgentDrug 医师进行药品代买
+func PhysiciansOrderAgentDrug(ctx *gin.Context) {
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	id := ctx.Query("id")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
+		"id":        id,
+		"physician": userMessage.UUID,
+	})
+	if drugRecord != (model.Drug{}) && drugRecord.AlreadyBuy {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("Already buy").Build(ctx)
+		return
+	}
+	if err := drug.UpdateDrugRecord(map[string]interface{}{
+		"id":        id,
+		"physician": userMessage.UUID,
+	}, map[string]interface{}{
+		"already_buy": true,
+	}); err != nil {
+		log.Println(err)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+// PhysiciansOrderDelivery 医师接单派送
+func PhysiciansOrderDelivery(ctx *gin.Context) {
+	receiverUserMes, exists := ctx.Get("user_message")
+	userMessage := receiverUserMes.(model.Account)
+	if !exists {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	id := ctx.Query("id")
+	certificate := ctx.Query("certificate")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	if err := drug.UpdateDrugRecord(map[string]interface{}{
+		"id":        id,
+		"physician": userMessage.UUID,
+	}, map[string]interface{}{
+		"delivery_certificate": certificate,
+	}); err != nil {
+		log.Println(err)
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+func QueryDrugByID(ctx *gin.Context) {
+	id := ctx.Query("id")
+	if id == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
+		"id": id,
+	})
+	if drugRecord == (model.Drug{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("No such drug").Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugRecord).Build(ctx)
 }

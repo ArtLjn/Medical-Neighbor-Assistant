@@ -1,0 +1,47 @@
+server:
+  host: 0.0.0.0
+  port: 8089
+
+mysql:
+  username: root
+  password: 123456
+  host: localhost
+  port: 3306
+  database: med_health
+  charset: utf8mb4
+
+upload:
+  domain: http://192.168.1.115:8080/ipfs/
+  max_size: 500MB
+  ipfs: http://192.168.1.115:5001
+
+redis:
+  addr: 127.0.0.1:6379
+  password: ""
+  db: 0
+
+# 默认管理员账号密码
+defaultAdmin:
+  username: admin
+  password: admin
+  chain_address: #区块链账户地址
+
+log:  # 日志管理服务
+  level: debug  # 日志输出级别
+  clean_cycle: 7  # 日志清理周期
+  out_path: log  # 日志输出路径
+  prefix: MediaNeighbor  # 日志文件前缀
+  open: true  # 是否开启日志文件输出服务
+
+authorizationFilter:  # 权限认证路径管理
+  need_authorization_api_list:
+    - /api/user/queryUserMessage
+    - /api/inquiry/queryPatientInquiryRecord
+    - /api/inquiry/queryPhysicianInquiryRecord
+    - /api/inquiry/createInquiryRecord
+    - /api/inquiry/physicianReception
+    - /api/drug/queryPatientAgentDrugHistory
+    - /api/drug/queryPhysiciansAgentHistoryRecord
+    - /api/drug/patientAgentDrugConfirmReceipt
+    - /api/drug/physiciansOrderAgentDrug
+    - /api/drug/physiciansOrderDelivery

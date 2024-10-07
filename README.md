@@ -2,7 +2,7 @@
 <div>
 
 ![Go version](https://img.shields.io/badge/go-%3E%3Dv1.22-9cf)
-![Release](https://img.shields.io/badge/release-1.1-green.svg)
+![Release](https://img.shields.io/badge/release-1.0-green.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 </div>
 

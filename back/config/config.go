@@ -8,8 +8,8 @@
 package config
 
 import (
-	"fmt"
-	"gopkg.in/ini.v1"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -20,101 +20,56 @@ var (
 
 type OriginConfig struct {
 	Server struct {
-		Host string
-		Port string
-	}
-	Dns        string
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"server"`
+	Mysql struct {
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
+		Host     string `yaml:"host"`
+		Port     string `yaml:"port"`
+		Database string `yaml:"database"`
+		Charset  string `yaml:"charset"`
+	} `yaml:"mysql"`
 	UploadRepo struct {
-		Domain  string `json:"domain"`   // 域名
-		MaxSize string `json:"max_size"` // 最大文件大小（字节）
-		Ipfs    string `json:"ipfs"`
-	}
+		Domain  string `yaml:"domain"`   // 域名
+		MaxSize string `yaml:"max_size"` // 最大文件大小（字节）
+		Ipfs    string `yaml:"ipfs"`
+	} `yaml:"upload"`
 	DefaultAdmin struct {
-		Username string
-		Password string
-	}
+		Username     string `yaml:"username"`
+		Password     string `yaml:"password"`
+		ChainAddress string `yaml:"chain_address"`
+	} `yaml:"defaultAdmin"`
 	Redis struct {
-		Addr     string `json:"addr"`
-		Password string `json:"password"`
-		Db       int    `json:"db"`
-	}
+		Addr     string `yaml:"addr"`
+		Password string `yaml:"password"`
+		Db       int    `yaml:"db"`
+	} `yaml:"redis"`
 	Log struct {
-		Level      string
-		CleanCycle int
-		OutPath    string
-		Prefix     string
-		Open       bool
-	}
+		Level      string `yaml:"level"`
+		CleanCycle int    `yaml:"clean_cycle"`
+		OutPath    string `yaml:"out_path"`
+		Prefix     string `yaml:"prefix"`
+		Open       bool   `yaml:"open"`
+	} `yaml:"log"`
 	AuthorizationFilter struct {
-		NeedAuthorizationApiList []string
-	}
+		NeedAuthorizationApiList []string `yaml:"need_authorization_api_list"`
+	} `yaml:"authorizationFilter"`
 }
 
 func InitConfig() *OriginConfig {
-	cfg, err := ini.Load("./config/config.ini")
+	data, err := ioutil.ReadFile("/Users/ljn/Documents/blockchaincomplete/Internet+/back/config/config.yaml")
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
 	}
-	return &OriginConfig{
-		Server: struct {
-			Host string
-			Port string
-		}{
-			Host: cfg.Section("server").Key("host").String(),
-			Port: cfg.Section("server").Key("port").String(),
-		},
-		Dns: fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
-			cfg.Section("mysql").Key("username").String(),
-			cfg.Section("mysql").Key("password").String(),
-			cfg.Section("mysql").Key("host").String(),
-			cfg.Section("mysql").Key("port").String(),
-			cfg.Section("mysql").Key("database").String(),
-			cfg.Section("mysql").Key("charset").String(),
-		),
-		UploadRepo: struct {
-			Domain  string `json:"domain"`   // 域名
-			MaxSize string `json:"max_size"` // 最大文件大小（字节）
-			Ipfs    string `json:"ipfs"`
-		}{
-			Domain:  cfg.Section("upload").Key("domain").String(),
-			MaxSize: cfg.Section("upload").Key("max_size").String(),
-			Ipfs:    cfg.Section("upload").Key("ipfs").String(),
-		},
-		DefaultAdmin: struct {
-			Username string
-			Password string
-		}{
-			Username: cfg.Section("defaultAdmin").Key("username").String(),
-			Password: cfg.Section("defaultAdmin").Key("password").String(),
-		},
-		Redis: struct {
-			Addr     string `json:"addr"`
-			Password string `json:"password"`
-			Db       int    `json:"db"`
-		}{
-			Addr:     cfg.Section("redis").Key("addr").String(),
-			Password: cfg.Section("redis").Key("password").String(),
-			Db:       cfg.Section("redis").Key("db").MustInt(),
-		},
-		Log: struct {
-			Level      string
-			CleanCycle int
-			OutPath    string
-			Prefix     string
-			Open       bool
-		}{
-			Level:      cfg.Section("log").Key("level").String(),
-			CleanCycle: cfg.Section("log").Key("clean_cycle").MustInt(),
-			OutPath:    cfg.Section("log").Key("out_path").String(),
-			Prefix:     cfg.Section("log").Key("prefix").String(),
-			Open:       cfg.Section("log").Key("open").MustBool(),
-		},
-		AuthorizationFilter: struct {
-			NeedAuthorizationApiList []string
-		}{
-			NeedAuthorizationApiList: cfg.Section("authorizationFilter").Key("need_authorization_api_list").Strings(","),
-		},
+	var config OriginConfig
+	if err = yaml.Unmarshal(data, &config); err != nil {
+		log.Println(err)
+		os.Exit(1)
 	}
 
+	LoadConfig = &config
+	return LoadConfig
 }

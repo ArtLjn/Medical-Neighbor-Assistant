@@ -23,13 +23,15 @@ type Account struct {
 }
 
 type Drug struct {
-	ID          uint   `json:"id" gorm:"primaryKey;autoIncrement;not null"`       // 自增主键
-	Patient     string `json:"patient" gorm:"type:varchar(255);comment:患者姓名"`     // 患者姓名
-	Physician   string `json:"physician" gorm:"type:varchar(255);comment:医师姓名"`   // 医师姓名
-	Hospital    string `json:"hospital" gorm:"type:varchar(255);comment:医院名称"`    // 医院名称
-	CreateTime  string `json:"create_time" gorm:"type:varchar(255);comment:创建时间"` // 创建时间
-	BindMedical uint   `json:"bind_medical" gorm:"comment:绑定病历"`                  // 绑定病历
-	AlreadyBuy  bool   `json:"already_buy" gorm:"type:tinyint(1);comment:是否已经购买"` // 是否已经购买
+	ID                  uint   `json:"id" gorm:"primaryKey;autoIncrement;not null"`                // 自增主键
+	Patient             string `json:"patient" gorm:"type:varchar(255);comment:患者姓名"`              // 患者姓名
+	Physician           string `json:"physician" gorm:"type:varchar(255);comment:医师姓名"`            // 医师姓名
+	Hospital            string `json:"hospital" gorm:"type:varchar(255);comment:医院名称"`             // 医院名称
+	CreateTime          string `json:"create_time" gorm:"type:varchar(255);comment:创建时间"`          // 创建时间
+	BindMedical         uint   `json:"bind_medical" gorm:"comment:绑定病历"`                           // 绑定病历
+	AlreadyBuy          bool   `json:"already_buy" gorm:"type:tinyint(1);comment:是否已经购买"`          // 是否已经购买
+	DeliveryCertificate string `json:"delivery_certificate" gorm:"type:varchar(255);comment:派送凭证"` // 派送凭证
+	IsReceive           bool   `json:"is_receive" gorm:"type:tinyint(1);comment:是否收货"`             // 是否收货
 }
 
 type DrugDelivery struct {

@@ -55,11 +55,25 @@ func MedicalRegistration(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
+	// 查询问诊记录并进行校验合法性
+	inquiryRecord := Inquiry.QueryInquiryRecordByCond(map[string]interface{}{"id": receiver.BindInquiryID})
+	if inquiryRecord == (model.Inquiry{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
+		return
+	} else if !inquiryRecord.IsReception {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("未被接诊").Build(ctx)
+		return
+	} else if inquiryRecord.IsInquiry {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("已经问诊完成，无需在进行登记").Build(ctx)
+		return
+	}
+	// 创建病历
 	medicalId, err := medical.CreateMedical(receiver)
 	if err != nil {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
+
 	// 如果患者需要代购药品
 	if receiver.IsNeedByDrug {
 		inquiryMsg := Inquiry.QueryInquiryRecordByCond(map[string]interface{}{
@@ -84,6 +98,7 @@ func MedicalRegistration(ctx *gin.Context) {
 			CreateTime:  time.Now().Format("2006-01-02 15:04:05"),
 			BindMedical: medicalId,
 			AlreadyBuy:  false,
+			IsReceive:   false,
 		}
 		if err = drug.CreateDrugTask(drugReceiver); err != nil {
 			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg("创建代购药品失败").Build(ctx)
