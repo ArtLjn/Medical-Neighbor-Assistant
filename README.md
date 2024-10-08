@@ -11,6 +11,7 @@
 ## 系统设计
 
 <img src="./static/img.png" style="width: 800px"/>
+<img src="./static/img_1.png" style="width: 800px">
 
 ## 项目结构 🧐
 
@@ -18,4 +19,8 @@
 |------|----------------------------------------------------|
 | 后端服务 | [/medHealth/back](./back/docs/医邻助手.md)             |
 | 智能合约 | [/medHealth/truffle/contract](./truffle/contracts) |
+
+TODO
+/drug/queryPatientAgentDrugHistory 返回详细信息用户，病历，以及问诊记录
+
 

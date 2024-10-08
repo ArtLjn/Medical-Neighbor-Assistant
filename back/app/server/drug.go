@@ -31,6 +31,7 @@ func InitDrugService(group *gin.RouterGroup) {
 		drugGroup.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
 		drugGroup.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
 		drugGroup.GET("/queryAllDrug", QueryAllDrug)
+		drugGroup.GET("/queryDrugByMedicalId", QueryDrugByMedicalId)
 	}
 }
 
@@ -230,6 +231,20 @@ func QueryDrugByID(ctx *gin.Context) {
 	}
 	drugRecord := drug.QueryDrugAndAccountMessage(id)
 	if drugRecord == nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("No such drug").Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugRecord).Build(ctx)
+}
+
+func QueryDrugByMedicalId(ctx *gin.Context) {
+	medicalId := ctx.Query("medical_id")
+	if medicalId == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	drugRecord := drug.QueryDrugRecord(map[string]interface{}{"bind_medical": medicalId})
+	if drugRecord == (model.Drug{}) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("No such drug").Build(ctx)
 		return
 	}

@@ -27,6 +27,7 @@ func InitMedicalService(group *gin.RouterGroup) {
 	{
 		medicalRouter.GET("/queryMedialRecordInformation", QueryMedialRecordInformation)
 		medicalRouter.POST("/medicalRegistration", MedicalRegistration)
+		medicalRouter.GET("/queryMedicalByID", QueryMedicalByID)
 	}
 }
 
@@ -130,4 +131,20 @@ func MedicalRegistration(ctx *gin.Context) {
 		}
 	}
 	response.PublicResponse.NewBuildSuccess(ctx)
+}
+
+func QueryMedicalByID(ctx *gin.Context) {
+	medicalId := ctx.Query("medicalId")
+	if medicalId == "" {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		return
+	}
+	medicalRecord := medical.QueryMedicalByCond(map[string]interface{}{
+		"id": medicalId,
+	})
+	if medicalRecord == (model.Medical{}) {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
+		return
+	}
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(medicalRecord).Build(ctx)
 }

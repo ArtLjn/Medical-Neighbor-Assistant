@@ -22,11 +22,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
-)
-
-var (
-	finish = make(chan bool)
 )
 
 func main() {
@@ -73,25 +70,24 @@ func wireApp() {
 	}
 }
 
-// 优雅关闭服务器
 func graceStop(srv *http.Server) {
 	go func() {
 		// 服务连接
-		if err := srv.ListenAndServe(); !(err == nil || errors.Is(err, http.ErrServerClosed)) {
+		if err := srv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
 
-	// 等待中断信号以优雅地关闭服务器（设置 5 秒的超时时间）
+	// 等待中断信号以优雅地关闭服务器
 	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM) // 添加对SIGTERM的支持
+
 	<-quit
 	log.Println("Shutdown Server ...")
 	log.Println("Clear Cache TokenManager ...", data.Rdb.Del(context.Background(), token.TokenMangerKey).Err())
-	// 关闭服务器
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	<-finish
-	defer cancel()
+	defer cancel() // 确保在函数返回之前调用cancel
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatal("Server Shutdown:", err)
 	}
