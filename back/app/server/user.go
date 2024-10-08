@@ -136,7 +136,7 @@ func UploadUserMessage(ctx *gin.Context) {
 		return
 	}
 	user.WritePhysicianToDB(rows2)
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("用户信息导入成功").SetData(nil).Build(ctx)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("后台持续为您导入中，请耐心等待").SetData(nil).Build(ctx)
 }
 
 // QueryPatientInformation 查询病人信息

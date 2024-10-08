@@ -20,8 +20,9 @@ var (
 
 type OriginConfig struct {
 	Server struct {
-		Host string `yaml:"host"`
-		Port string `yaml:"port"`
+		Host      string `yaml:"host"`
+		Port      string `yaml:"port"`
+		GraceStop bool   `yaml:"grace_stop"`
 	} `yaml:"server"`
 	Mysql struct {
 		Username string `yaml:"username"`

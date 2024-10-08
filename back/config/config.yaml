@@ -1,12 +1,13 @@
 server:
   host: 0.0.0.0
-  port: 8088
+  port: 8089
+  grace_stop: false # 优雅停止
 
 mysql:
   username: root
   password: 123456
-  host: localhost
-  port: 3306
+  host: 192.168.1.115
+  port: 33306
   database: med_health
   charset: utf8mb4
 
@@ -23,7 +24,7 @@ redis:
 # 合约配置文件
 contract:
   contract_name: MedHealth
-  contract_address: 0xdf3d47b021e4092dbb6749d6b12a2a8dc7f4392c
+  contract_address: 0xfa1d0eb7214e56155b2ca6a2dd6af60a9717e5fe
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
   owner: 0x29e2db8ad37fb85a2466db8517d380dc98c2d51c
   server_host: "http://localhost:5002"
@@ -45,7 +46,7 @@ log:  # 日志管理服务
   open: true  # 是否开启日志文件输出服务
 
 authorizationFilter:  # 权限认证路径管理
-  need_authorization_api_list:
+  need_authorization_api_list: #需要权限认证的接口
     - /api/user/queryUserMessage
     - /api/inquiry/queryPatientInquiryRecord
     - /api/inquiry/queryPhysicianInquiryRecord
@@ -57,3 +58,4 @@ authorizationFilter:  # 权限认证路径管理
     - /api/drug/physiciansOrderAgentDrug
     - /api/drug/physiciansOrderDelivery
     - /api/medical/medicalRegistration
+

@@ -11,7 +11,7 @@ import "testing"
 
 func TestValidate(t *testing.T) {
 	t.Log(Validate(LoginBo{
-		Username: "ljn",
+		Phone:    "ljn",
 		Password: "123456",
 	}))
 }

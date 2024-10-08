@@ -38,11 +38,15 @@ func main() {
 	}
 	// 注册相关服务
 	registerService(r)
-	err := r.Run(srv.Addr)
-	if err != nil {
-		return
+	if config.LoadConfig.Server.GraceStop {
+		graceStop(srv)
+	} else {
+		err := r.Run(srv.Addr)
+		if err != nil {
+			return
+		}
 	}
-	//graceStop(srv)
+
 }
 
 func registerService(r *gin.Engine) {

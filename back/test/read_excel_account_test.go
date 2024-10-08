@@ -5,7 +5,7 @@
 @Software: GoLand
 */
 
-package user
+package test
 
 import (
 	"fmt"

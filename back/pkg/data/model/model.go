@@ -20,6 +20,7 @@ type Account struct {
 	HomeAddr     string `json:"home_addr" gorm:"type:varchar(255);comment:家庭地址"`        // 家庭地址
 	Nickname     string `json:"nickname" gorm:"type:varchar(255);comment:昵称"`           // 昵称
 	Age          int    `json:"age" gorm:"type:int;comment:年龄"`                         //年龄
+	CreateTime   string `json:"create_time" gorm:"type:varchar(255);comment:创建时间"`      // 创建时间
 }
 
 type Drug struct {
