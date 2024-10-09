@@ -101,6 +101,7 @@ func queryDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
 	query := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"d.id as drug_id,"+
 			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
@@ -172,7 +173,7 @@ func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(nil).Build(ctx)
 }
 
 // PhysiciansOrderAgentDrug 医师进行药品代买
@@ -280,6 +281,7 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 	err := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"d.id as drug_id,"+
 			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).

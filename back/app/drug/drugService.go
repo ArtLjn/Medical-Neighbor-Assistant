@@ -58,6 +58,7 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"d.id as drug_id,"+
 			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
@@ -87,6 +88,7 @@ func QueryAllDrug() []map[string]interface{} {
 	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, " +
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive," +
+			"d.id as drug_id," +
 			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).

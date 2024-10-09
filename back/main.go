@@ -62,6 +62,7 @@ func registerService(r *gin.Engine) {
 	server.InitInquiryService(publicGroup)
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
+	server.InitMockData(publicGroup)
 }
 
 func wireApp() {

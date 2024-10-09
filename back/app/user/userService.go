@@ -50,12 +50,11 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 		mx       sync.Mutex
 	)
 
-	// 遍历接收器，跳过第一个元素（第一个元素为空）
 	for i, v := range receiver {
 		if i == 0 {
 			continue
 		}
-		// 创建一个账户结构体
+
 		account := model.Account{
 			Username:   v[0],
 			Sex:        v[1],
@@ -65,55 +64,42 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 			Role:       roleType,
 			CreateTime: time.Now().Format("2006-01-02 15:04:05"),
 		}
-		// 如果是医生，则处理医生特有的字段
+
 		if isPhysician {
+			// 处理医生特有的字段
 			account.Hospital = v[3]
 		} else {
+			// 处理患者特有的字段
 			account.HomeAddr = v[3]
 			age, _ := strconv.Atoi(v[4]) // 转换年龄
 			account.Age = age
 		}
-		// 将账户添加到切片中
+
 		accounts = append(accounts, account)
 	}
 
 	go func() {
-		// 开始一个数据库事务
-		tx := data.Db.Begin()
-		if tx.Error != nil {
-			log.Println("Error starting transaction:", tx.Error)
-			return
-		}
-
 		mx.Lock()
 		for _, v := range accounts {
-			if err := tx.Create(&v).Error; err != nil {
+			if err := data.Db.Create(&v).Error; err != nil {
 				log.Println("Error while inserting accounts:", err)
-				tx.Rollback() // 回滚事务
-				return
+				continue
 			}
 			currentAddress, err := util.GenerateHttpAccount(v.UUID)
 			if err != nil {
 				log.Println("Error while generating account:", err)
-				tx.Rollback() // 回滚事务
-				return
+				continue
 			}
 			v.ChainAccount = currentAddress
-			if err = tx.Model(&v).Updates(v).Error; err != nil {
+			if err = data.Db.Model(&v).Updates(v).Error; err != nil {
 				log.Println("Error while updating account:", err)
-				tx.Rollback() // 回滚事务
-				return
+				continue
 			}
 			util.IsSuccess(util.CommonEq("registerAccount", []interface{}{
 				v.ChainAccount,
 				roleType,
 				v.UUID,
 			}))
-		}
-
-		// 提交事务
-		if err := tx.Commit().Error; err != nil {
-			log.Println("Error committing transaction:", err)
 		}
 		mx.Unlock()
 	}()

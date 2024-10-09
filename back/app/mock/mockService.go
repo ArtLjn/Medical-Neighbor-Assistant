@@ -1,18 +1,16 @@
 /*
-@Time : 2024/10/8 09:55
+@Time : 2024/10/9 16:21
 @Author : ljn
-@File : system_test
+@File : mockService
 @Software: GoLand
 */
 
-package test
+package mock
 
 import (
 	"back/app/user"
-	"back/config"
 	"math/rand"
 	"strconv"
-	"testing"
 	"time"
 )
 
@@ -30,12 +28,7 @@ var nameList = []string{
 	"芳", "娜", "秀", "娟", "英", "华", "慧", "婷",
 }
 
-func InitConfig() {
-	config.InitConfig("../config/config.yaml")
-}
-
-func TestLoadMorePatientAccount(t *testing.T) {
-	InitConfig()
+func LoadMorePatientAccount(number int) {
 	var (
 		accounts [][]string // account列表
 	)
@@ -44,7 +37,7 @@ func TestLoadMorePatientAccount(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 
 	// 扩展的名列表
-	for i := 0; i < 100; i++ {
+	for i := 0; i < number; i++ {
 		// 随机选择姓氏和名
 		username := surnameList[rand.Intn(len(surnameList))] + nameList[rand.Intn(len(nameList))]
 
@@ -68,8 +61,7 @@ func TestLoadMorePatientAccount(t *testing.T) {
 	user.WritePatientToDB(accounts)
 }
 
-func TestLoadMoreDoctorAccount(t *testing.T) {
-	InitConfig()
+func LoadMoreDoctorAccount(number int) {
 	var (
 		accounts [][]string // account列表
 	)
@@ -78,7 +70,7 @@ func TestLoadMoreDoctorAccount(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 
 	// 扩展的名列表
-	for i := 0; i < 100; i++ {
+	for i := 0; i < number; i++ {
 		// 随机选择姓氏和名
 		username := surnameList[rand.Intn(len(surnameList))] + nameList[rand.Intn(len(nameList))]
 
