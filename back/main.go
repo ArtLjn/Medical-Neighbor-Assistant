@@ -15,9 +15,11 @@ import (
 	"back/pkg/data"
 	"back/pkg/ipfs"
 	"back/pkg/token"
+	"back/pkg/util"
 	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
 	"log"
 	"net/http"
 	"os"
@@ -27,14 +29,18 @@ import (
 )
 
 func main() {
+	Execute()
 	wireApp()
+
 	r := gin.Default()
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,
 	}
+
 	// 注册相关服务
 	registerService(r)
+
 	if config.LoadConfig.Server.GraceStop {
 		graceStop(srv)
 	} else {
@@ -43,7 +49,6 @@ func main() {
 			return
 		}
 	}
-
 }
 
 func registerService(r *gin.Engine) {
@@ -60,7 +65,6 @@ func registerService(r *gin.Engine) {
 }
 
 func wireApp() {
-	config.LoadConfig = config.InitConfig()
 	data.Db = data.NewDB()
 	data.Rdb = data.NewRDB()
 	token.TokenF = token.NewToken(data.Rdb)
@@ -92,4 +96,36 @@ func graceStop(srv *http.Server) {
 		log.Fatal("Server Shutdown:", err)
 	}
 	log.Println("Server exiting")
+}
+
+var rootCmd = &cobra.Command{
+	Use:   "MedHealthCli",
+	Short: "MedHealthCli is a cli tool for MedHealth",
+	Long:  `MedHealthCli is a cli tool for MedHealth`,
+	Run: func(cmd *cobra.Command, args []string) {
+		err := cmd.Help()
+		if err != nil {
+			return
+		}
+	},
+}
+
+func Execute() {
+	util.PrintMedHealthLogo()
+	var configPath string
+
+	// 将configPath作为全局flag
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "", "Custom configuration file path (optional)")
+
+	rootCmd.Run = func(cmd *cobra.Command, args []string) {
+		if configPath != "" {
+			config.InitConfig(configPath) // 使用指定的配置文件路径
+			log.Printf("Using custom config path: %s\n", configPath)
+		} else {
+			log.Println("No custom config path provided. Using default configuration.")
+			config.LoadConfig = config.InitConfig() // 加载默认配置
+		}
+	}
+
+	cobra.CheckErr(rootCmd.Execute())
 }

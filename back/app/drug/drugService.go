@@ -44,16 +44,26 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 	var result map[string]interface{}
 	var (
 		drug    model.Drug
-		account model.Account
+		medical model.Medical
+		inquiry model.Inquiry
+		acc     model.Account
 	)
 
-	err := data.Db.Table(drug.TableName()).
-		Select(fmt.Sprintf("%s.*, patient.username AS patient_username, physician.username AS physician_username", drug.TableName())).
-		Joins(fmt.Sprintf("LEFT JOIN %s AS patient ON patient.uuid = %s.patient", account.TableName(), drug.TableName())).
-		Joins(fmt.Sprintf("LEFT JOIN %s AS physician ON physician.uuid = %s.physician", account.TableName(), drug.TableName())).
-		Where(fmt.Sprintf("%s.id = ?", drug.TableName()), drugId).
-		Scan(&result).Error
-
+	//err := data.Db.Table(drug.TableName()).
+	//	Select(fmt.Sprintf("%s.*, patient.username AS patient_username, physician.username AS physician_username", drug.TableName())).
+	//	Joins(fmt.Sprintf("LEFT JOIN %s AS patient ON patient.uuid = %s.patient", account.TableName(), drug.TableName())).
+	//	Joins(fmt.Sprintf("LEFT JOIN %s AS physician ON physician.uuid = %s.physician", account.TableName(), drug.TableName())).
+	//	Where(fmt.Sprintf("%s.id = ?", drug.TableName()), drugId).
+	//	Scan(&result).Error
+	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
+		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
+			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
+		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
+		Where("d.id = ?", drugId).Scan(&result).Error
 	if err != nil {
 		return nil
 	}
@@ -64,13 +74,24 @@ func QueryAllDrug() []map[string]interface{} {
 	var results []map[string]interface{}
 	var (
 		drug    model.Drug
-		account model.Account
+		acc     model.Account
+		medical model.Medical
+		inquiry model.Inquiry
 	)
 
-	err := data.Db.Table(drug.TableName()).
-		Select(fmt.Sprintf("%s.*, patient.username AS patient_username, physician.username AS physician_username", drug.TableName())).
-		Joins(fmt.Sprintf("LEFT JOIN %s AS patient ON patient.uuid = %s.patient", account.TableName(), drug.TableName())).
-		Joins(fmt.Sprintf("LEFT JOIN %s AS physician ON physician.uuid = %s.physician", account.TableName(), drug.TableName())).
+	//err := data.Db.Table(drug.TableName()).
+	//	Select(fmt.Sprintf("%s.*, patient.username AS patient_username, physician.username AS physician_username", drug.TableName())).
+	//	Joins(fmt.Sprintf("LEFT JOIN %s AS patient ON patient.uuid = %s.patient", account.TableName(), drug.TableName())).
+	//	Joins(fmt.Sprintf("LEFT JOIN %s AS physician ON physician.uuid = %s.physician", account.TableName(), drug.TableName())).
+	//	Scan(&results).Error
+	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
+		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, " +
+			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive," +
+			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
+		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
 		Scan(&results).Error
 	if err != nil {
 		return nil

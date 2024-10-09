@@ -89,30 +89,57 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
 }
 
-func queryDrugRecord(raw, cond, val string) ([]model.Drug, error) {
-	query := data.Db.Model(&model.Drug{}).Where(fmt.Sprintf("%s = ?", cond), val)
-
+func queryDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
+	//query := data.Db.Model(&model.Drug{}).Where(fmt.Sprintf("%s = ?", cond), val)
+	var (
+		acc        = model.Account{}
+		inquiry    = model.Inquiry{}
+		medical    = model.Medical{}
+		drugRecord = model.Drug{}
+		results    []map[string]interface{}
+	)
+	query := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
+		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
+			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
+		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
+		Where(fmt.Sprintf("d.%s = ?", cond), val)
+	//switch raw {
+	//case DrugAlreadyBy:
+	//	query = query.Where("already_buy = ?", true)
+	//case DrugNotBy:
+	//	query = query.Where("already_buy = ?", false)
+	//case AlreadyCertificate:
+	//	query = query.Where("delivery_certificate IS NOT NULL").Where("delivery_certificate != ''").Where("is_receive = ?", false)
+	//case NotCertificate:
+	//	query = query.Where("already_buy = ?", true).Where("delivery_certificate = ''")
+	//case FinishDrug:
+	//	query = query.Where("is_receive = ?", true)
+	//default:
+	//	// 未定义或空的 `raw` 参数可以返回一个默认查询或者错误
+	//}
 	switch raw {
 	case DrugAlreadyBy:
-		query = query.Where("already_buy = ?", true)
+		query = query.Where("d.already_buy = ?", true)
 	case DrugNotBy:
-		query = query.Where("already_buy = ?", false)
+		query = query.Where("d.already_buy = ?", false)
 	case AlreadyCertificate:
-		query = query.Where("delivery_certificate IS NOT NULL").Where("delivery_certificate != ''").Where("is_receive = ?", false)
+		query = query.Where("d.delivery_certificate IS NOT NULL").Where("d.delivery_certificate != ''").Where("d.is_receive = ?", false)
 	case NotCertificate:
-		query = query.Where("already_buy = ?", true).Where("delivery_certificate = ''")
+		query = query.Where("d.already_buy = ?", true).Where("d.delivery_certificate = ''")
 	case FinishDrug:
-		query = query.Where("is_receive = ?", true)
+		query = query.Where("d.is_receive = ?", true)
 	default:
 		// 未定义或空的 `raw` 参数可以返回一个默认查询或者错误
 	}
-
-	var drugList []model.Drug
-	if err := query.Find(&drugList).Error; err != nil {
+	if err := query.Scan(&results).Error; err != nil {
 		log.Printf("Error querying drug history for user %s: %v", val, err)
 		return nil, err
 	}
-	return drugList, nil
+	return results, nil
 }
 
 // HospitalAgentDrugConfirmReceipt 医院管理人员审核药品代买情况
@@ -243,12 +270,29 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
-	drugRecord := drug.QueryDrugRecord(map[string]interface{}{"bind_medical": medicalId})
-	if drugRecord == (model.Drug{}) {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("No such drug").Build(ctx)
+	var (
+		result     map[string]interface{}
+		acc        = model.Account{}
+		inquiry    = model.Inquiry{}
+		medical    = model.Medical{}
+		drugRecord = model.Drug{}
+	)
+	err := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
+		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
+			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
+			"j.username as patient_username,j.sex as patient_sex,j.age as patient_age, p.username as physician_username").
+		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
+		Where("d.bind_medical = ?", medicalId).Scan(&result).Error
+	if err != nil {
+		log.Printf("Error querying drug history for user %s: %v", medicalId, err)
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
 		return
 	}
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugRecord).Build(ctx)
+	//drugRecord := drug.QueryDrugRecord(map[string]interface{}{"bind_medical": medicalId})
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(result).Build(ctx)
 }
 
 func QueryAllDrug(ctx *gin.Context) {
