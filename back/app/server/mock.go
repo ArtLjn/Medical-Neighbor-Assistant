@@ -17,11 +17,15 @@ import (
 func InitMockData(group *gin.RouterGroup) {
 	mockGroup := group.Group("/mock")
 	{
+		mockGroup.GET("/ping", Ping)
 		mockGroup.GET("/generatePatientAccount", GeneratePatientAccount)
 		mockGroup.GET("/generatePhysicianAccount", GeneratePhysicianAccount)
 	}
 }
 
+func Ping(ctx *gin.Context) {
+	response.PublicResponse.NewBuildSuccess(ctx)
+}
 func GeneratePatientAccount(ctx *gin.Context) {
 	number := ctx.Query("number")
 	num, _ := strconv.Atoi(number)

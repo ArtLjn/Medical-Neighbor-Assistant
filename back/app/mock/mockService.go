@@ -19,13 +19,21 @@ var surnameList = []string{
 	"冯", "陈", "褚", "卫", "蒋", "沈", "韩", "杨",
 	"朱", "秦", "尤", "许", "何", "吕", "施", "张",
 	"孔", "曹", "严", "华", "金", "魏", "陶", "姜",
+	"戚", "谢", "邹", "喻", "柏", "水", "窦", "章",
+	"云", "苏", "潘", "葛", "奚", "范", "彭", "郎",
+	"鲁", "韦", "昌", "马", "苗", "凤", "花", "方",
+	"俞", "任", "袁", "柳", "酆", "鲍", "史", "唐",
 }
 
 var nameList = []string{
-	"伟", "芳", "娜", "秀英", "敏", "静", "丽", "强",
+	"伟", "芳", "娜", "楠", "敏", "静", "丽", "强",
 	"磊", "军", "洋", "勇", "艳", "杰", "娟", "涛",
-	"明", "超", "秀", "辉", "霞", "平", "刚", "桂英",
+	"明", "超", "秀", "辉", "霞", "平", "刚", "英",
 	"芳", "娜", "秀", "娟", "英", "华", "慧", "婷",
+	"波", "宁", "安", "岩", "松", "竹", "梅", "雁",
+	"航", "天", "昊", "翔", "宇", "文", "武", "思",
+	"豪", "杰", "峰", "林", "泉", "溪", "川", "洲",
+	"翰", "墨", "书", "画", "琴", "棋", "诗", "酒",
 }
 
 func LoadMorePatientAccount(number int) {
@@ -38,8 +46,19 @@ func LoadMorePatientAccount(number int) {
 
 	// 扩展的名列表
 	for i := 0; i < number; i++ {
-		// 随机选择姓氏和名
-		username := surnameList[rand.Intn(len(surnameList))] + nameList[rand.Intn(len(nameList))]
+		// 随机选择姓氏
+		surname := surnameList[rand.Intn(len(surnameList))]
+
+		// 随机选择一个或两个字作为名
+		var name string
+		if rand.Intn(2) == 0 { // 50%的概率选择一个字的名
+			name = nameList[rand.Intn(len(nameList))]
+		} else { // 50%的概率选择两个字的名
+			name = nameList[rand.Intn(len(nameList))] + nameList[rand.Intn(len(nameList))]
+		}
+
+		// 组合姓名
+		username := surname + name
 
 		// 随机性别
 		sex := []string{"男", "女"}[rand.Intn(2)]
@@ -71,8 +90,19 @@ func LoadMoreDoctorAccount(number int) {
 
 	// 扩展的名列表
 	for i := 0; i < number; i++ {
-		// 随机选择姓氏和名
-		username := surnameList[rand.Intn(len(surnameList))] + nameList[rand.Intn(len(nameList))]
+		// 随机选择姓氏
+		surname := surnameList[rand.Intn(len(surnameList))]
+
+		// 随机选择一个或两个字作为名
+		var name string
+		if rand.Intn(2) == 0 { // 50%的概率选择一个字的名
+			name = nameList[rand.Intn(len(nameList))]
+		} else { // 50%的概率选择两个字的名
+			name = nameList[rand.Intn(len(nameList))] + nameList[rand.Intn(len(nameList))]
+		}
+
+		// 组合姓名
+		username := surname + name
 
 		// 随机性别
 		sex := []string{"男", "女"}[rand.Intn(2)]
