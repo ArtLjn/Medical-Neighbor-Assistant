@@ -10,15 +10,20 @@ package server
 import (
 	"back/app/ai"
 	"back/pkg/custom_error"
+	"back/pkg/data"
 	"back/pkg/data/model"
 	"back/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
 func InitAiService(group *gin.RouterGroup) {
+	go ai.HandleMessages()
+	// 启动 MongoDB 数据监听
+	go ai.WatchChanges(data.FastGptChatItems)
 	aiGroup := group.Group("/ai")
 	{
 		aiGroup.GET("/getMedicalSum", getMedicalSum)
+		aiGroup.GET("/ws_chat", ai.HandleConnections)
 	}
 }
 
@@ -32,7 +37,7 @@ func getMedicalSum(ctx *gin.Context) {
 	}
 	medicalSum, err := ai.GetUserAskInfo(userMessage.UUID)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
+		response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
 	sumRecord, err := ai.AskAiSumUpInquiry(medicalSum)

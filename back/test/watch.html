@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket ChatId</title>
+</head>
+<body>
+<h1>Listening for chatId changes...</h1>
+<ul id="chatIds"></ul>
+
+<script>
+    const socket = new WebSocket("ws://localhost:8080/ws");
+
+    // 连接成功
+    socket.onopen = function(event) {
+        console.log("WebSocket connected");
+    };
+
+    // 接收消息
+    socket.onmessage = function(event) {
+        const chatId = event.data;
+        const chatIdList = document.getElementById("chatIds");
+        const newItem = document.createElement("li");
+        newItem.textContent = `New chatId detected: ${chatId}`;
+        chatIdList.appendChild(newItem);
+    };
+
+    // 处理 WebSocket 错误
+    socket.onerror = function(event) {
+        console.error("WebSocket error:", event);
+    };
+
+    // 连接关闭
+    socket.onclose = function(event) {
+        console.log("WebSocket closed:", event);
+    };
+</script>
+</body>
+</html>
