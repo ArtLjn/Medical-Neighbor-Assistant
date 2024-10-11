@@ -9,15 +9,21 @@ package data
 
 import (
 	"back/config"
+	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 )
 
 var (
-	Db  *gorm.DB
-	Rdb *redis.Client
+	Db               *gorm.DB
+	Rdb              *redis.Client
+	Cli              *mongo.Client
+	FastGptChatItems *mongo.Collection
 )
 
 func NewDB() *gorm.DB {
@@ -46,4 +52,27 @@ func NewRDB() *redis.Client {
 			Password: config.LoadConfig.Redis.Password,
 		},
 	)
+}
+
+func NewMongo(url ...string) *mongo.Client {
+	currentUrl := config.LoadConfig.Mongo.Url
+	if len(url) > 0 {
+		currentUrl = url[0]
+	}
+	clientOptions := options.Client().ApplyURI(currentUrl)
+	// Connect to MongoDB
+	client, err := mongo.Connect(context.TODO(), clientOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Check the connection
+	err = client.Ping(context.TODO(), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return client
+}
+
+func NewFastGptChatItems() *mongo.Collection {
+	return Cli.Database("fastgpt").Collection("chatitems")
 }

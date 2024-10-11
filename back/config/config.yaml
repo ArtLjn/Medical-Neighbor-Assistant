@@ -1,6 +1,6 @@
 server:
   host: 0.0.0.0
-  port: 8089
+  port: 8088
   grace_stop: false # 优雅停止
 
 mysql:
@@ -10,6 +10,9 @@ mysql:
   port: 3306
   database: med_health
   charset: utf8mb4
+
+mongo:
+  url: "mongodb://myusername:mygptpassword@192.168.1.115:27017/fastgpt?authSource=admin&directConnection=true"
 
 upload:
   domain: http://192.168.1.115:8080/ipfs/ # ipfs网管
@@ -45,6 +48,13 @@ log:  # 日志管理服务
   prefix: MediaNeighbor  # 日志文件前缀
   open: true  # 是否开启日志文件输出服务
 
+ai: # AI
+  url: http://192.168.1.115:3001/v1/chat/completions # 服务地址
+  authorization: Bearer sk-fastgptnb
+  prompt:
+    # 问诊总结话术
+    sum_up_inquiry: "你现在是一名病历生成助手，下面是用户与AI的对话记录，请你分析这些对话记录去总结生成一分病历总结，简短易懂一段话"
+
 authorizationFilter:  # 权限认证路径管理
   need_authorization_api_list: #需要权限认证的接口
     - /api/user/queryUserMessage
@@ -58,4 +68,5 @@ authorizationFilter:  # 权限认证路径管理
     - /api/drug/physiciansOrderAgentDrug
     - /api/drug/physiciansOrderDelivery
     - /api/medical/medicalRegistration
+    - /api/ai/getMedicalSum
 

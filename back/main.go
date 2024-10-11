@@ -63,11 +63,14 @@ func registerService(r *gin.Engine) {
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
 	server.InitMockData(publicGroup)
+	server.InitAiService(publicGroup)
 }
 
 func wireApp() {
 	data.Db = data.NewDB()
 	data.Rdb = data.NewRDB()
+	data.Cli = data.NewMongo()
+	data.FastGptChatItems = data.NewFastGptChatItems()
 	token.TokenF = token.NewToken(data.Rdb)
 	// 开启日志输出服务
 	if config.LoadConfig.Log.Open {

@@ -69,12 +69,12 @@ func TestGenerateTestData(t *testing.T) {
 
 	// 设置Sheet1为活动Sheet
 	f.SetActiveSheet(index)
-
-	// 保存Excel文件
-	if err := f.SaveAs("testdata.xlsx"); err != nil {
-		t.Fatalf("保存测试数据失败: %v", err)
-	}
-	fmt.Println("Excel文件已生成：testdata.xlsx")
+	//
+	//// 保存Excel文件
+	//if err := f.SaveAs("testdata.xlsx"); err != nil {
+	//	t.Fatalf("保存测试数据失败: %v", err)
+	//}
+	//fmt.Println("Excel文件已生成：testdata.xlsx")
 }
 
 func TestMain(m *testing.M) {

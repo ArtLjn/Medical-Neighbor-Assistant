@@ -67,6 +67,16 @@ type OriginConfig struct {
 	AuthorizationFilter struct {
 		NeedAuthorizationApiList []string `yaml:"need_authorization_api_list"`
 	} `yaml:"authorizationFilter"`
+	Mongo struct {
+		Url string `yaml:"url"`
+	}
+	AI struct {
+		Url           string `yaml:"url"`
+		Authorization string `yaml:"authorization"`
+		Prompt        struct {
+			SumUpInquiry string `yaml:"sum_up_inquiry"`
+		} `yaml:"prompt"`
+	} `yaml:"ai"`
 }
 
 func InitConfig(p ...string) *OriginConfig {
