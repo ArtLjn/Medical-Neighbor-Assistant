@@ -9,6 +9,8 @@ package data
 
 import (
 	"back/config"
+	"back/pkg/custom_log"
+	"back/pkg/token"
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
@@ -26,6 +28,16 @@ var (
 	FastGptChatItems *mongo.Collection
 )
 
+func InitApp() {
+	Db = NewDB()
+	Rdb = NewRDB()
+	token.TokenF = token.NewToken(Rdb)
+	token.JwtKey = []byte(config.LoadConfig.AuthorizationFilter.JwtKey)
+	// 开启日志输出服务
+	if config.LoadConfig.Log.Open {
+		go custom_log.InitGinLog(config.LoadConfig)
+	}
+}
 func NewDB() *gorm.DB {
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
 		config.LoadConfig.Mysql.Username,

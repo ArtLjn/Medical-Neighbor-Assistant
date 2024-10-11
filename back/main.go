@@ -11,7 +11,6 @@ import (
 	"back/app/server"
 	"back/config"
 	"back/pkg/auth"
-	"back/pkg/custom_log"
 	"back/pkg/data"
 	"back/pkg/ipfs"
 	"back/pkg/token"
@@ -30,7 +29,7 @@ import (
 
 func main() {
 	Execute()
-	wireApp()
+	data.InitApp()
 
 	r := gin.Default()
 	srv := &http.Server{
@@ -63,18 +62,10 @@ func registerService(r *gin.Engine) {
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
 	server.InitMockData(publicGroup)
-	server.InitAiService(publicGroup)
-}
-
-func wireApp() {
-	data.Db = data.NewDB()
-	data.Rdb = data.NewRDB()
-	data.Cli = data.NewMongo()
-	data.FastGptChatItems = data.NewFastGptChatItems()
-	token.TokenF = token.NewToken(data.Rdb)
-	// 开启日志输出服务
-	if config.LoadConfig.Log.Open {
-		go custom_log.InitGinLog(config.LoadConfig)
+	if config.LoadConfig.AI.OpenAiServer {
+		data.Cli = data.NewMongo()
+		data.FastGptChatItems = data.NewFastGptChatItems()
+		server.InitAiService(publicGroup)
 	}
 }
 

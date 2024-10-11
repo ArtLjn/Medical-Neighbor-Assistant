@@ -14,6 +14,8 @@ import (
 
 var TokenF TokenManager
 
+var JwtKey []byte
+
 const TokenMangerKey = "token_manager"
 
 type TokenManager interface {
@@ -42,12 +44,12 @@ func generateRandomToken(n int) (string, error) {
 	return hex.EncodeToString(b), nil
 }
 func (t *Token) SaveToken(username string) string {
-	token, err := generateRandomToken(16)
+	token, err := CreateToken(username)
 	if err != nil {
 		log.Println("❌ 生成token失败")
 		return ""
 	}
-	_, err = t.rdb.HSet(context.Background(), TokenMangerKey, token, username).Result()
+	_, err = t.rdb.HSet(context.Background(), TokenMangerKey, username, token).Result()
 	if err != nil {
 		log.Println("❌ 保存token失败")
 		return ""
@@ -55,15 +57,26 @@ func (t *Token) SaveToken(username string) string {
 	return token
 }
 
-func (t *Token) LogOutToken(username string) {
-	_, err := t.rdb.HDel(context.Background(), TokenMangerKey, username).Result()
+func (t *Token) LogOutToken(token string) {
+	uuid, err := GetUserUUID(token)
+	if err != nil {
+		log.Println("❌ token无效")
+		return
+	}
+	_, err = t.rdb.HDel(context.Background(), TokenMangerKey, uuid).Result()
 	if err != nil {
 		log.Println("❌ 删除token失败")
+		return
 	}
 }
 
 func (t *Token) VerifyToken(token string) (string, error) {
-	uuid, err := t.rdb.HGet(context.Background(), TokenMangerKey, token).Result()
+	uuid, err := GetUserUUID(token)
+	if err != nil {
+		log.Println("❌ token无效")
+		return "", fmt.Errorf("❌ token无效")
+	}
+	_, err = t.rdb.HGet(context.Background(), TokenMangerKey, uuid).Result()
 	if errors.Is(err, redis.Nil) {
 		log.Println("❌ token不存在")
 		return "", fmt.Errorf("❌ token不存在")

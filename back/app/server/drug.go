@@ -90,7 +90,6 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 }
 
 func queryDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
-	//query := data.Db.Model(&model.Drug{}).Where(fmt.Sprintf("%s = ?", cond), val)
 	var (
 		acc        = model.Account{}
 		inquiry    = model.Inquiry{}
@@ -108,20 +107,7 @@ func queryDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
 		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
 		Where(fmt.Sprintf("d.%s = ?", cond), val)
-	//switch raw {
-	//case DrugAlreadyBy:
-	//	query = query.Where("already_buy = ?", true)
-	//case DrugNotBy:
-	//	query = query.Where("already_buy = ?", false)
-	//case AlreadyCertificate:
-	//	query = query.Where("delivery_certificate IS NOT NULL").Where("delivery_certificate != ''").Where("is_receive = ?", false)
-	//case NotCertificate:
-	//	query = query.Where("already_buy = ?", true).Where("delivery_certificate = ''")
-	//case FinishDrug:
-	//	query = query.Where("is_receive = ?", true)
-	//default:
-	//	// 未定义或空的 `raw` 参数可以返回一个默认查询或者错误
-	//}
+
 	switch raw {
 	case DrugAlreadyBy:
 		query = query.Where("d.already_buy = ?", true)
@@ -293,7 +279,6 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.NotFound).Build(ctx)
 		return
 	}
-	//drugRecord := drug.QueryDrugRecord(map[string]interface{}{"bind_medical": medicalId})
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(result).Build(ctx)
 }
 

@@ -76,7 +76,7 @@ func WatchChanges(collection *mongo.Collection) {
 	pipeline := mongo.Pipeline{}
 	cs, err := collection.Watch(context.Background(), pipeline)
 	if err != nil {
-		log.Fatal("Error starting Change Stream:", err)
+		log.Println("Error starting Change Stream:", err)
 	}
 	defer cs.Close(context.Background())
 
@@ -111,6 +111,6 @@ func WatchChanges(collection *mongo.Collection) {
 	}
 
 	if err := cs.Err(); err != nil {
-		log.Fatal("Error occurred while watching changes:", err)
+		log.Println("Error occurred while watching changes:", err)
 	}
 }

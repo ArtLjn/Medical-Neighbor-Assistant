@@ -54,8 +54,13 @@ ai: # AI
   prompt:
     # 问诊总结话术
     sum_up_inquiry: "你现在是一名病历生成助手，下面是用户与AI的对话记录，请你分析这些对话记录去总结生成一分病历总结，简短易懂一段话"
+  #是否开启聊天记录mongo监听
+  watch_mongo_chat: true
+  # AI服务总开关
+  open_ai_server: false
 
 authorizationFilter:  # 权限认证路径管理
+  jwt_key: "med_health_key_@key"
   need_authorization_api_list: #需要权限认证的接口
     - /api/user/queryUserMessage
     - /api/inquiry/queryPatientInquiryRecord

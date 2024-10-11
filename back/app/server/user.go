@@ -26,25 +26,23 @@ import (
 
 func InitUserService(group *gin.RouterGroup) {
 	userGroup := group.Group("/user")
-	{
-		userGroup.POST("/login", Login)
-		userGroup.POST("/adminLogin", AdminLoginS)
-		userGroup.GET("/queryPatientInformation", QueryPatientInformation)
-		userGroup.GET("/queryDoctorInformation", QueryDoctorInformation)
-		userGroup.POST("/uploadUserMessage", UploadUserMessage)
-		userGroup.PUT("/updatePatientInformation", UpdatePatientInformation)
-		userGroup.PUT("/updatePhysicianInformation", UpdatePhysicianInformation)
-		userGroup.GET("/logOut", LogOut)
-		userGroup.GET("/verifyToken", VerifyToken)
-		userGroup.GET("/queryUserMessage", QueryUserMessage)
-	}
+	userGroup.POST("/login", Login)
+	userGroup.POST("/adminLogin", AdminLoginS)
+	userGroup.GET("/queryPatientInformation", QueryPatientInformation)
+	userGroup.GET("/queryDoctorInformation", QueryDoctorInformation)
+	userGroup.POST("/uploadUserMessage", UploadUserMessage)
+	userGroup.PUT("/updatePatientInformation", UpdatePatientInformation)
+	userGroup.PUT("/updatePhysicianInformation", UpdatePhysicianInformation)
+	userGroup.GET("/logOut", LogOut)
+	userGroup.GET("/verifyToken", VerifyToken)
+	userGroup.GET("/queryUserMessage", QueryUserMessage)
+
 }
 
 // Login 登录接口
 func Login(ctx *gin.Context) {
 	var (
-		receiver   bo.LoginBo
-		responseVo vo.LoginResponseVo
+		receiver bo.LoginBo
 	)
 	if err := ctx.ShouldBindJSON(&receiver); err != nil {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
@@ -53,21 +51,11 @@ func Login(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-	account := user.QueryUser(map[string]interface{}{
-		"phone":    receiver.Phone,
-		"password": receiver.Password,
-	})
-	if account == (model.Account{}) {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
-		return
-	} else if len(util.CommonEq("getAccount", []interface{}{
-		account.ChainAccount,
-	})) == 0 {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("账号或密码错误").Build(ctx)
+	responseVo, err := user.AccountLogin(receiver)
+	if err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-	util.BeanUtil.CopyProperties(account, &responseVo)
-	responseVo.Token = token.TokenF.SaveToken(account.UUID)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(responseVo).Build(ctx)
 }
 
@@ -227,6 +215,7 @@ func LogOut(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
 		return
 	}
+
 	token.TokenF.LogOutToken(authorization)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
 }

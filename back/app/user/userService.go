@@ -12,7 +12,9 @@ import (
 	"back/pkg/data"
 	"back/pkg/data/bo"
 	"back/pkg/data/model"
+	"back/pkg/data/vo"
 	"back/pkg/role"
+	"back/pkg/token"
 	"back/pkg/util"
 	"errors"
 	"github.com/google/uuid"
@@ -162,4 +164,32 @@ func AdminLogin(receiver bo.AdminLoginBo) bool {
 	}
 	// 如果登录失败，返回 false
 	return false
+}
+
+// AccountLogin  用户登录
+// 这段代码是用户登录的函数，主要完成以下几个步骤：
+// 1. 根据手机号和密码查询用户信息
+// 2. 如果用户信息存在且密码正确，生成登录响应结果并返回
+// 3. 如果用户信息或密码错误，返回错误信息
+
+func AccountLogin(receiver bo.LoginBo) (vo.LoginResponseVo, error) {
+	// 定义一个 vo.LoginResponseVo 类型的变量，用于存储登录响应结果
+	var responseVo vo.LoginResponseVo
+	// 查询用户信息
+	account := QueryUser(map[string]interface{}{
+		"phone":    receiver.Phone,
+		"password": receiver.Password,
+	})
+	// 如果用户信息不存在或密码错误，返回错误信息
+	if account == (model.Account{}) || len(util.CommonEq("getAccount", []interface{}{
+		account.ChainAccount,
+	})) == 0 {
+		return vo.LoginResponseVo{}, errors.New("用户名或密码错误")
+	}
+	// 使用 bean util 工具类将用户信息复制到登录响应结果中
+	util.BeanUtil.CopyProperties(account, &responseVo)
+	// 生成登录令牌并保存到数据库
+	responseVo.Token = token.TokenF.SaveToken(account.UUID)
+	// 返回登录响应结果
+	return responseVo, nil
 }

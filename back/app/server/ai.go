@@ -9,6 +9,7 @@ package server
 
 import (
 	"back/app/ai"
+	"back/config"
 	"back/pkg/custom_error"
 	"back/pkg/data"
 	"back/pkg/data/model"
@@ -17,12 +18,12 @@ import (
 )
 
 func InitAiService(group *gin.RouterGroup) {
-	go ai.HandleMessages()
-	// 启动 MongoDB 数据监听
-	go ai.WatchChanges(data.FastGptChatItems)
 	aiGroup := group.Group("/ai")
-	{
-		aiGroup.GET("/getMedicalSum", getMedicalSum)
+	aiGroup.GET("/getMedicalSum", getMedicalSum)
+	if config.LoadConfig.AI.WatchMongoChat {
+		go ai.HandleMessages()
+		// 启动 MongoDB 数据监听
+		go ai.WatchChanges(data.FastGptChatItems)
 		aiGroup.GET("/ws_chat", ai.HandleConnections)
 	}
 }

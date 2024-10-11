@@ -65,6 +65,7 @@ type OriginConfig struct {
 		Open       bool   `yaml:"open"`
 	} `yaml:"log"`
 	AuthorizationFilter struct {
+		JwtKey                   string   `yaml:"jwt_key"`
 		NeedAuthorizationApiList []string `yaml:"need_authorization_api_list"`
 	} `yaml:"authorizationFilter"`
 	Mongo struct {
@@ -76,6 +77,8 @@ type OriginConfig struct {
 		Prompt        struct {
 			SumUpInquiry string `yaml:"sum_up_inquiry"`
 		} `yaml:"prompt"`
+		WatchMongoChat bool `yaml:"watch_mongo_chat"`
+		OpenAiServer   bool `yaml:"open_ai_server"`
 	} `yaml:"ai"`
 }
 

@@ -24,26 +24,32 @@ const (
 	CommunityMedicalTreatment = "社区就医"
 )
 
-func CreateInquiry(chainAccount string, bean bo.CreateInquiryBo) error {
+func CreateInquiry(chainAccount string, bean bo.CreateInquiryBo) (uint, error) {
 	var inquiry model.Inquiry
 	util.BeanUtil.CopyProperties(bean, &inquiry)
 	inquiry.IsInquiry = false
 	inquiry.IsReception = false
-	if err := data.Db.Create(&inquiry).Error; err != nil {
+	tx := data.Db.Begin()
+	if err := tx.Create(&inquiry).Error; err != nil {
+		tx.Rollback()
 		log.Println(err)
-		return fmt.Errorf("create inquiry failed")
+		return 0, fmt.Errorf("create inquiry failed")
 	}
-	_, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount, "patientRegistrationInquiry", []interface{}{
+
+	r, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount, "patientRegistrationInquiry", []interface{}{
 		inquiry.ID,
 		FamilyMedicalTreatment,
 	}))
-	if e != nil {
-		data.Db.Delete(&inquiry)
+	if !r && e != nil {
+		tx.Rollback()
 		log.Println(e)
-		return e
+		return 0, e
 	}
-
-	return nil
+	if err := tx.Commit().Error; err != nil {
+		log.Println(err)
+		return 0, fmt.Errorf("commit failed")
+	}
+	return inquiry.ID, nil
 }
 
 func UpdateInquiryPhysician(id, name string) error {
