@@ -15,6 +15,7 @@ import (
 	"back/pkg/data/vo"
 	"back/pkg/util"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 	"sync"
 )
@@ -82,11 +83,8 @@ const (
 	Pending
 )
 
-func QueryAllInquiry(isInquiry int) []vo.QueryInquiryVo {
-	var (
-		inquiry []model.Inquiry
-	)
-	query := data.Db
+func QueryAllInquiry(isInquiry, page, size int) map[string]interface{} {
+	query := data.Db.Model(model.Inquiry{})
 	switch isInquiry {
 	case InquiryTrue:
 		// 查询已经问诊结束的记录
@@ -101,16 +99,11 @@ func QueryAllInquiry(isInquiry int) []vo.QueryInquiryVo {
 		// 查询已经指派医师但是医师暂时没有接诊的记录
 		query = query.Where("physician != ?", "").Where("is_reception = ?", false)
 	}
-	if err := query.Find(&inquiry).Error; err != nil {
-		log.Println(err)
-		return nil
-	}
-	return transferToInquiryVo(inquiry)
+	return transferPage(query, page, size)
 }
 
-func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
-	var inquiry []model.Inquiry
-	query := data.Db.Where("physician = ?", uuid)
+func QueryPhysicianInquiryRecord(uuid string, isInquiry, page, size int) map[string]interface{} {
+	query := data.Db.Model(model.Inquiry{}).Where("physician = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
@@ -119,19 +112,14 @@ func QueryPhysicianInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo
 	case Pending:
 		query = query.Where("is_reception = ?", false)
 	default:
-		log.Println("unhandled default case")
-		return nil
+
 	}
-	if err := query.Find(&inquiry).Error; err != nil {
-		log.Println(err)
-		return nil
-	}
-	return transferToInquiryVo(inquiry)
+
+	return transferPage(query, page, size)
 }
 
-func QueryPatientInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
-	var inquiry []model.Inquiry
-	query := data.Db.Where("patient = ?", uuid)
+func QueryPatientInquiryRecord(uuid string, isInquiry, page, size int) map[string]interface{} {
+	query := data.Db.Model(model.Inquiry{}).Where("patient = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
@@ -140,13 +128,32 @@ func QueryPatientInquiryRecord(uuid string, isInquiry int) []vo.QueryInquiryVo {
 	default:
 
 	}
-	if err := query.Find(&inquiry).Error; err != nil {
+	return transferPage(query, page, size)
+}
+
+func transferPage(query *gorm.DB, page, size int) map[string]interface{} {
+	var (
+		inquiry []model.Inquiry
+		total   int64
+	)
+	offset := (page - 1) * size
+	// 先执行 Count 查询总数
+	if err := query.Count(&total).Error; err != nil {
+		log.Printf("query heritage count error: %v", err)
+		return nil
+	}
+	if err := query.Offset(offset).Limit(size).Find(&inquiry).Error; err != nil {
 		log.Println(err)
 		return nil
 	}
-	return transferToInquiryVo(inquiry)
+	// 构建返回的结果
+	m := make(map[string]interface{})
+	m["total"] = total
+	m["totalPages"] = (total + int64(size) - 1) / int64(size) // 计算总页数
+	m["currentPage"] = page
+	m["list"] = transferToInquiryVo(inquiry)
+	return m
 }
-
 func UpdateIsInquiry(id string) error {
 	r, e := util.IsSuccessMsg(util.CommonEq("hospitalReviewInquiry", []interface{}{id}))
 	if !r && e != nil {

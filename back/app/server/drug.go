@@ -18,20 +18,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
+	"strconv"
 )
 
 func InitDrugService(group *gin.RouterGroup) {
 	drugGroup := group.Group("/drug")
-	{
-		drugGroup.GET("/queryPatientAgentDrugHistory", QueryPatientAgentDrugHistory)
-		drugGroup.GET("/queryPhysiciansAgentHistoryRecord", QueryPhysiciansAgentHistoryRecord)
-		drugGroup.GET("/queryDrugByID", QueryDrugByID)
-		drugGroup.POST("/hospitalAgentDrugConfirmReceipt", HospitalAgentDrugConfirmReceipt)
-		drugGroup.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
-		drugGroup.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
-		drugGroup.GET("/queryAllDrug", QueryAllDrug)
-		drugGroup.GET("/queryDrugByMedicalId", QueryDrugByMedicalId)
-	}
+	drugGroup.GET("/queryPatientAgentDrugHistory", QueryPatientAgentDrugHistory)
+	drugGroup.GET("/queryPhysiciansAgentHistoryRecord", QueryPhysiciansAgentHistoryRecord)
+	drugGroup.GET("/queryDrugByID", QueryDrugByID)
+	drugGroup.POST("/hospitalAgentDrugConfirmReceipt", HospitalAgentDrugConfirmReceipt)
+	drugGroup.POST("/physiciansOrderAgentDrug", PhysiciansOrderAgentDrug)
+	drugGroup.POST("/physiciansOrderDelivery", PhysiciansOrderDelivery)
+	drugGroup.GET("/queryAllDrug", QueryAllDrug)
+	drugGroup.GET("/queryDrugByMedicalId", QueryDrugByMedicalId)
+
 }
 
 // QueryPatientAgentDrugHistory 患者查询药品代买历史记录
@@ -47,7 +47,9 @@ func QueryPatientAgentDrugHistory(ctx *gin.Context) {
 		return
 	}
 	raw := ctx.DefaultQuery("raw", "0")
-	drugList, err := drug.GetDrugRecord(raw, "patient", userMessage.UUID)
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	drugList, err := drug.GetDrugRecord(raw, "patient", userMessage.UUID, page, size)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
@@ -70,7 +72,9 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 	}
 
 	raw := ctx.DefaultQuery("raw", "0")
-	drugList, err := drug.GetDrugRecord(raw, "physician", userMessage.UUID)
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	drugList, err := drug.GetDrugRecord(raw, "physician", userMessage.UUID, page, size)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
@@ -186,6 +190,12 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 }
 
 func QueryAllDrug(ctx *gin.Context) {
-	drugList := drug.QueryAllDrug()
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	drugList, err := drug.QueryAllDrug(page, size)
+	if err != nil {
+		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		return
+	}
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
 }

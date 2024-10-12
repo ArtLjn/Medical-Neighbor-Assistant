@@ -15,9 +15,12 @@ import (
 	"back/pkg/data/model"
 	"back/pkg/data/vo"
 	"back/pkg/response"
+	"back/pkg/role"
 	"back/pkg/token"
 	"back/pkg/util"
+
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -129,12 +132,18 @@ func UploadUserMessage(ctx *gin.Context) {
 
 // QueryPatientInformation 查询病人信息
 func QueryPatientInformation(ctx *gin.Context) {
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(user.QueryAllPatient()).Build(ctx)
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	response.PublicResponse.SetCode(custom_error.SuccessCode).
+		SetMsg("success").SetData(user.QueryPatientPage(page, size, role.Patient)).Build(ctx)
 }
 
 // QueryDoctorInformation 查询医生信息
 func QueryDoctorInformation(ctx *gin.Context) {
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(user.QueryAllPhysician()).Build(ctx)
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	response.PublicResponse.SetCode(custom_error.SuccessCode).
+		SetMsg("success").SetData(user.QueryPatientPage(page, size, role.Physician)).Build(ctx)
 }
 
 // UpdatePatientInformation 更新病人信息

@@ -40,6 +40,34 @@ func QueryAllPatient() []model.Account {
 	return accounts
 }
 
+func QueryPatientPage(page, size int, role string) map[string]interface{} {
+	var (
+		accounts []model.Account
+		total    int64
+	)
+	query := data.Db.Model(model.Account{}).Where("role = ?", role)
+
+	offset := (page - 1) * size
+	// 先执行 Count 查询总数
+	if err := query.Count(&total).Error; err != nil {
+		log.Printf("query heritage count error: %v", err)
+		return nil
+	}
+	// 再执行分页查询
+	if err := query.Offset(offset).Limit(size).Find(&accounts).Error; err != nil {
+		log.Printf("query heritage error: %v", err)
+		return nil
+	}
+
+	// 构建返回的结果
+	m := make(map[string]interface{})
+	m["total"] = total
+	m["totalPages"] = (total + int64(size) - 1) / int64(size) // 计算总页数
+	m["currentPage"] = page
+	m["list"] = accounts
+	return m
+}
+
 func QueryAllPhysician() []model.Account {
 	var accounts []model.Account
 	data.Db.Where("role = ?", role.Physician).Find(&accounts)

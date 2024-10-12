@@ -63,10 +63,11 @@ func CreateInquiryRecord(ctx *gin.Context) {
 // QueryAllInquiryRecord 查询所有问诊记录: 管理员使用
 // @param isInquiry 1: 已经问诊结束 2: 未问诊 3: 未指派医师 4: 代接诊
 func QueryAllInquiryRecord(ctx *gin.Context) {
-	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
-	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
-		SetData(Inquiry.QueryAllInquiry(isInquiry)).Build(ctx)
+		SetData(Inquiry.QueryAllInquiry(isInquiry, page, size)).Build(ctx)
 }
 
 // QueryPatientInquiryRecord 查询问诊患者记录
@@ -77,10 +78,11 @@ func QueryPatientInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
-	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
-	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
-		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(userMessage.UUID, isInquiry)).Build(ctx)
+		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(userMessage.UUID, isInquiry, page, size)).Build(ctx)
 }
 
 // QueryPhysicianInquiryRecord 查询问诊医生记录
@@ -91,10 +93,11 @@ func QueryPhysicianInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
-	isInquiryStr := ctx.DefaultQuery("isInquiry", "0")
-	isInquiry, _ := strconv.Atoi(isInquiryStr)
+	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
-		SetData(Inquiry.QueryPhysicianInquiryRecord(userMessage.UUID, isInquiry)).Build(ctx)
+		SetData(Inquiry.QueryPhysicianInquiryRecord(userMessage.UUID, isInquiry, page, size)).Build(ctx)
 }
 
 func QueryInquiryRecordById(ctx *gin.Context) {

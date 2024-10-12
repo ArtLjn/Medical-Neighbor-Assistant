@@ -13,6 +13,7 @@ import (
 	"back/pkg/util"
 	"errors"
 	"fmt"
+	"gorm.io/gorm"
 	"log"
 )
 
@@ -68,8 +69,7 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 	return result
 }
 
-func QueryAllDrug() []map[string]interface{} {
-	var results []map[string]interface{}
+func QueryAllDrug(page, size int) (map[string]interface{}, error) {
 	var (
 		drug    model.Drug
 		acc     model.Account
@@ -77,7 +77,7 @@ func QueryAllDrug() []map[string]interface{} {
 		inquiry model.Inquiry
 	)
 
-	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
+	query := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, " +
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive," +
 			"d.id as drug_id," +
@@ -85,12 +85,8 @@ func QueryAllDrug() []map[string]interface{} {
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
-		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
-		Scan(&results).Error
-	if err != nil {
-		return nil
-	}
-	return results
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName()))
+	return transferPage(query, page, size)
 }
 
 func PhysicianAgentDrug(id, uuid, chainAccount string) error {
@@ -127,13 +123,12 @@ const (
 	FinishDrug         = "5" // 已经完成
 )
 
-func GetDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
+func GetDrugRecord(raw, cond, val string, page, size int) (map[string]interface{}, error) {
 	var (
 		acc        = model.Account{}
 		inquiry    = model.Inquiry{}
 		medical    = model.Medical{}
 		drugRecord = model.Drug{}
-		results    []map[string]interface{}
 	)
 	query := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
@@ -160,11 +155,35 @@ func GetDrugRecord(raw, cond, val string) ([]map[string]interface{}, error) {
 	default:
 		// 未定义或空的 `raw` 参数可以返回一个默认查询或者错误
 	}
-	if err := query.Scan(&results).Error; err != nil {
-		log.Printf("Error querying drug history for user %s: %v", val, err)
+
+	return transferPage(query, page, size)
+}
+
+func transferPage(query *gorm.DB, page, size int) (map[string]interface{}, error) {
+	var (
+		total   int64
+		results []map[string]interface{}
+	)
+
+	offset := (page - 1) * size
+
+	// 先执行 Count 查询总数
+	if err := query.Count(&total).Error; err != nil {
+		log.Printf("query count error: %v", err)
 		return nil, err
 	}
-	return results, nil
+	if err := query.Offset(offset).Limit(size).Scan(&results).Error; err != nil {
+		log.Printf("Error querying drug history for user  %v", err)
+		return nil, err
+	}
+
+	// 构建返回的结果
+	m := make(map[string]interface{})
+	m["total"] = total
+	m["totalPages"] = (total + int64(size) - 1) / int64(size) // 计算总页数
+	m["currentPage"] = page
+	m["list"] = results
+	return m, nil
 }
 
 func HospitalAgentDrug(drugId string) error {
