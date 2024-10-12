@@ -44,8 +44,6 @@ func CreateInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
-	// 绑定患者信息
-	inquiryRecord.Patient = userMessage.UUID
 	if err := ctx.ShouldBindJSON(&inquiryRecord); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return
@@ -53,7 +51,8 @@ func CreateInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-
+	// 绑定患者信息
+	inquiryRecord.Patient = userMessage.UUID
 	if _, err := Inquiry.CreateInquiry(userMessage.ChainAccount, inquiryRecord); err != nil {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return

@@ -61,7 +61,9 @@ func registerService(r *gin.Engine) {
 	server.InitInquiryService(publicGroup)
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
-	server.InitMockData(publicGroup)
+	if config.LoadConfig.Mock.Open {
+		server.InitMockData(publicGroup)
+	}
 	if config.LoadConfig.AI.OpenAiServer {
 		data.Cli = data.NewMongo()
 		data.FastGptChatItems = data.NewFastGptChatItems()

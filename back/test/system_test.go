@@ -8,23 +8,19 @@
 package test
 
 import (
-	"back/app/Inquiry"
+	"back/app/mock"
 	"back/app/server"
 	"back/app/user"
 	"back/config"
 	"back/pkg/data"
-	"back/pkg/data/bo"
 	"back/pkg/data/model"
 	"back/pkg/role"
-	"bufio"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 )
@@ -164,97 +160,35 @@ func TestPing(t *testing.T) {
 	assert.JSONEq(t, expectedResponse, w.Body.String())
 }
 
-func GenerateAppointTime() string {
-	// 假设您想要的随机时间范围是1小时到24小时之间
-	maxDuration := 24 * time.Hour
-	minDuration := 1 * time.Hour
-
-	// 生成一个随机持续时间
-	randomDuration := time.Duration(rand.Int63n(int64(maxDuration-minDuration))) + minDuration
-
-	// 获取当前时间
-	currentTime := time.Now()
-
-	// 计算随机的未来时间
-	randomFutureTime := currentTime.Add(randomDuration).Format("2006-01-02 15:04:05")
-
-	return randomFutureTime
-}
-
-func TestGenerateAppointTime(t *testing.T) {
-	GenerateAppointTime()
-}
-
-// ReadInquiryDetails 从文件中读取问诊描述
-func ReadInquiryDetails(filePath string) ([]string, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var details []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		details = append(details, strings.TrimSpace(line))
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-	return details, nil
-}
-
-// GenerateInquiryDetail 随机选择一个问诊描述
-func GenerateInquiryDetail(details []string) string {
-	rand.Seed(time.Now().UnixNano())
-	return details[rand.Intn(len(details))]
-}
-func TestLogin(t *testing.T) {
+func TestSystem(t *testing.T) {
 	config.InitConfig("../config/config.yaml")
 	data.InitApp()
-	details, err := ReadInquiryDetails("./detail.txt")
+	// 读取问诊详情
+	path := "/Users/ljn/Documents/blockchaincomplete/Internet+/back/asset/txt/"
+	inquiryDetails, err := mock.ReadTxtFile(path + "inquiryDetail.txt")
 	if err != nil {
-		t.Fatal(err)
-	}
-	patientList, physicianList := user.QueryAllPatient(), user.QueryAllPhysician()
-
-	for i := 0; i < 100; i++ {
-		patientAccount := patientList[rand.Intn(len(patientList))]
-		physicianAccount := physicianList[rand.Intn(len(physicianList))]
-		// Create a login request
-		patientLoginForm, physicianLoginForm := bo.LoginBo{
-			Phone:    patientAccount.Phone,
-			Password: patientAccount.Password,
-		}, bo.LoginBo{
-			Phone:    physicianAccount.Phone,
-			Password: physicianAccount.Password,
-		}
-		patientLoginResponse, err := user.AccountLogin(patientLoginForm)
-		physicianLoginResponse, err := user.AccountLogin(physicianLoginForm)
-		if err != nil {
-			continue
-		}
-		t.Log(patientLoginResponse, physicianLoginResponse)
-		inquiryId, err := Inquiry.CreateInquiry(patientAccount.ChainAccount, bo.CreateInquiryBo{
-			Patient:         patientAccount.UUID,
-			Type:            []string{"在家就医", "社区就医"}[rand.Intn(2)],
-			InquiryDetail:   GenerateInquiryDetail(details),
-			ReservedPhone:   patientAccount.Phone,
-			AppointmentTime: GenerateAppointTime(),
-		})
-		if err != nil {
-			t.Log("创建问诊失败", err)
-			continue
-		}
-		if err = Inquiry.UpdateInquiryPhysician(strconv.Itoa(int(inquiryId)), physicianAccount.UUID); err != nil {
-			t.Log("更新问诊医生失败", err)
-			continue
-		}
-		if err = Inquiry.UpdateIsReception(physicianAccount.ChainAccount, strconv.Itoa(int(inquiryId)), true); err != nil {
-			t.Log("更新问诊是否接诊失败", err)
-			continue
-		}
+		t.Fatalf("Failed to read inquiry details: %v", err)
 	}
 
+	inquiryVideoList, err := mock.ReadTxtFile(path + "inquiryVideo.txt")
+	if err != nil || len(inquiryVideoList) == 0 {
+		t.Fatalf("Failed to read inquiry video list: %v", err)
+	}
+
+	medicalImgList, err := mock.ReadTxtFile(path + "medicalImg.txt")
+	if err != nil || len(medicalImgList) == 0 {
+		t.Fatalf("Failed to read medical image list: %v", err)
+	}
+
+	drugDeliverCertificateList, err := mock.ReadTxtFile(path + "drugDeliverCertificate.txt")
+	if err != nil || len(drugDeliverCertificateList) == 0 {
+		t.Fatalf("Failed to read drug delivery certificate list: %v", err)
+	}
+
+	// 查询所有患者和医生
+	patientList := user.QueryAllPatient()
+	physicianList := user.QueryAllPhysician()
+
+	// 调用封装的方法
+	mock.RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCertificateList, patientList, physicianList, 20)
 }

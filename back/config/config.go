@@ -80,6 +80,16 @@ type OriginConfig struct {
 		WatchMongoChat bool `yaml:"watch_mongo_chat"`
 		OpenAiServer   bool `yaml:"open_ai_server"`
 	} `yaml:"ai"`
+	Mock struct {
+		Open          bool   `yaml:"open"`
+		AbsPath       string `yaml:"abs_path"`
+		AssetFileName struct {
+			InquiryDetail          string `yaml:"inquiry_detail"`
+			InquiryVideo           string `yaml:"inquiry_video"`
+			MedicalImg             string `yaml:"medical_img"`
+			DrugDeliverCertificate string `yaml:"drug_deliver_certificate"`
+		} `yaml:"asset_file_name"`
+	}
 }
 
 func InitConfig(p ...string) *OriginConfig {

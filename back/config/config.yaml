@@ -27,9 +27,9 @@ redis:
 # 合约配置文件
 contract:
   contract_name: MedHealth
-  contract_address: 0xfa1d0eb7214e56155b2ca6a2dd6af60a9717e5fe
+  contract_address: 0x69718b3ef765e9d22c74857f184d62b6fb25b9cc
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
-  owner: 0x29e2db8ad37fb85a2466db8517d380dc98c2d51c
+  owner: 0x31302447ba92dc24f74c5d90b04df90cfb34183e
   server_host: "http://localhost:5002"
   trans_url: "/WeBASE-Front/trans/handle"
   parse_url: "/WeBASE-Front/tool/decode"
@@ -58,6 +58,19 @@ ai: # AI
   watch_mongo_chat: true
   # AI服务总开关
   open_ai_server: false
+
+mock: # Mock模拟数据生成服务
+  open: true # 是否开启服务
+  abs_path: "/Users/ljn/Documents/blockchaincomplete/Internet+/back/asset/txt" #资源绝对路径
+  asset_file_name: #随机资源文件名称
+    # 随机问诊话术
+    inquiry_detail: "inquiryDetail.txt"
+    # 随机问诊视频
+    inquiry_video: "inquiryVideo.txt"
+    # 随机医疗单
+    medical_img: "medicalImg.txt"
+    # 随机药物派送凭证
+    drug_deliver_certificate: "drugDeliverCertificate.txt"
 
 authorizationFilter:  # 权限认证路径管理
   jwt_key: "med_health_key_@key"
