@@ -41,9 +41,6 @@ func main() {
 	gin.DefaultWriter = logger
 	r := gin.Default()
 
-	// 设置 Gin 日志中间件
-	r.Use(gin.Logger())
-	r.Use(gin.Recovery())
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,

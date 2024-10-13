@@ -8,7 +8,7 @@
 package server
 
 import (
-	user "back/app/user"
+	"back/app/user"
 	"back/config"
 	"back/pkg/custom_error"
 	"back/pkg/data/bo"

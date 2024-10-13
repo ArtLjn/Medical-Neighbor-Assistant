@@ -147,13 +147,12 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCert
 		}
 
 		// 模拟登录操作
-		patientLoginResponse, err := user.AccountLogin(patientLoginForm)
-		physicianLoginResponse, err := user.AccountLogin(physicianLoginForm)
+		_, err := user.AccountLogin(patientLoginForm)
+		_, err = user.AccountLogin(physicianLoginForm)
 		if err != nil {
 			log.Printf("登录失败: %v", err)
 			continue
 		}
-		log.Println(patientLoginResponse, physicianLoginResponse)
 
 		// 创建问诊
 		inquiryId, err := Inquiry.CreateInquiry(patientAccount.ChainAccount, bo.CreateInquiryBo{
@@ -183,7 +182,7 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCert
 		// 创建医疗文件
 		var medicalId uint
 		if err = medical.CreateMedicalF(bo.MedicalUploadBo{
-			DiagnosticDescription: "病人有高血压",
+			DiagnosticDescription: GenerateDetail(inquiryDetails),
 			BindInquiryID:         int(inquiryId),
 			InquiryVideo:          GenerateDetail(inquiryVideoList),
 			MedicalImg:            GenerateDetail(medicalImgList),
@@ -216,6 +215,7 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCert
 			log.Printf("医院代买确认失败: %v", err)
 		}
 	}
+	log.Println("模拟结束")
 }
 
 // ReadTxtFile 从文件中读取问诊描述

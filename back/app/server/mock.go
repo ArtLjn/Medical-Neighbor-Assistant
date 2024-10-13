@@ -13,7 +13,6 @@ import (
 	"back/config"
 	"back/pkg/custom_error"
 	"back/pkg/response"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"path/filepath"
 	"strconv"
@@ -85,11 +84,6 @@ func TestFullSystem(ctx *gin.Context) {
 		fileContentMap[key] = content
 	}
 
-	// 在这里你可以根据需要使用 fileContentMap 中的数据
-	// 例如，可以打印或处理这些文件内容
-	for key, content := range fileContentMap {
-		fmt.Printf("File: %s, Content: %v\n", key, content)
-	}
 	// 查询所有患者和医生
 	patientList := user.QueryAllPatient()
 	physicianList := user.QueryAllPhysician()
