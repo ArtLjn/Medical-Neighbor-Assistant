@@ -1,7 +1,7 @@
 server:
   host: 0.0.0.0
   port: 8088
-  grace_stop: false # 优雅停止
+  grace_stop: true # 优雅停止
 
 mysql:
   username: root
@@ -43,10 +43,13 @@ defaultAdmin:
 
 log:  # 日志管理服务
   level: debug  # 日志输出级别
+  open: true  # 是否开启日志文件输出服务
   clean_cycle: 7  # 日志清理周期
   out_path: log  # 日志输出路径
   prefix: MediaNeighbor  # 日志文件前缀
-  open: true  # 是否开启日志文件输出服务
+  maxsize: 10  # 每个日志文件的最大大小
+  compress: true #启用日志压缩
+  backup: 7 #保留旧的文件个数
 
 ai: # AI
   url: http://192.168.1.115:3001/v1/chat/completions # 服务地址

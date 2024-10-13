@@ -63,6 +63,9 @@ type OriginConfig struct {
 		OutPath    string `yaml:"out_path"`
 		Prefix     string `yaml:"prefix"`
 		Open       bool   `yaml:"open"`
+		MaxSize    int    `yaml:"max_size"`
+		Compress   bool   `yaml:"compress"`
+		Backup     int    `yaml:"backup"`
 	} `yaml:"log"`
 	AuthorizationFilter struct {
 		JwtKey                   string   `yaml:"jwt_key"`

@@ -11,6 +11,7 @@ import (
 	"back/app/server"
 	"back/config"
 	"back/pkg/auth"
+	"back/pkg/custom_log"
 	"back/pkg/data"
 	"back/pkg/ipfs"
 	"back/pkg/token"
@@ -30,8 +31,19 @@ import (
 func main() {
 	Execute()
 	data.InitApp()
-
+	// 初始化日志
+	l := config.LoadConfig.Log
+	logger, err := custom_log.InitLogger(l.OutPath, l.Prefix, l.MaxSize, l.Backup, l.CleanCycle, l.Compress)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 将 Gin 的日志输出指向同一个日志目标
+	gin.DefaultWriter = logger
 	r := gin.Default()
+
+	// 设置 Gin 日志中间件
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,

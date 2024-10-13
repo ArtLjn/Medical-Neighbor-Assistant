@@ -9,12 +9,12 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/ipfs/go-ipfs-api v0.7.0
 	github.com/redis/go-redis/v9 v9.6.1
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/thedevsaddam/gojsonq v2.3.0+incompatible
 	github.com/xuri/excelize/v2 v2.8.1
 	go.mongodb.org/mongo-driver v1.17.1
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
