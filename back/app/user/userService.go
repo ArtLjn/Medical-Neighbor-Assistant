@@ -17,7 +17,9 @@ import (
 	"back/pkg/token"
 	"back/pkg/util"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"log"
 	"strconv"
 	"sync"
@@ -40,22 +42,26 @@ func QueryAllPatient() []model.Account {
 	return accounts
 }
 
-func QueryPatientPage(page, size int, role string) map[string]interface{} {
+func QueryPage(page, size int, role string) map[string]interface{} {
+	query := data.Db.Model(model.Account{}).Where("role = ?", role)
+	return transferPage(query, page, size)
+}
+
+func transferPage(query *gorm.DB, page, size int) map[string]interface{} {
 	var (
 		accounts []model.Account
 		total    int64
 	)
-	query := data.Db.Model(model.Account{}).Where("role = ?", role)
 
 	offset := (page - 1) * size
 	// 先执行 Count 查询总数
 	if err := query.Count(&total).Error; err != nil {
-		log.Printf("query heritage count error: %v", err)
+		log.Printf("query count error: %v", err)
 		return nil
 	}
 	// 再执行分页查询
 	if err := query.Offset(offset).Limit(size).Find(&accounts).Error; err != nil {
-		log.Printf("query heritage error: %v", err)
+		log.Printf("query error: %v", err)
 		return nil
 	}
 
@@ -220,4 +226,12 @@ func AccountLogin(receiver bo.LoginBo) (vo.LoginResponseVo, error) {
 	responseVo.Token = token.TokenF.SaveToken(account.UUID)
 	// 返回登录响应结果
 	return responseVo, nil
+}
+
+// LikeQuery  查询用户信息
+// 这段代码定义了一个名为 LikeQuery 的函数，该函数接收两个参数：c 和 v。
+func LikeQuery(c, v interface{}, page, size int) map[string]interface{} {
+	query := data.Db.Model(model.Account{}).
+		Where(fmt.Sprintf("%s like ?", c), "%"+v.(string)+"%")
+	return transferPage(query, page, size)
 }

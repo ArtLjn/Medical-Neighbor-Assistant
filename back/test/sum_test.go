@@ -36,5 +36,6 @@ func TestParseTime(t *testing.T) {
 func TestInquiryTypeDay(t *testing.T) {
 	config.InitConfig("../config/config.yaml")
 	data.InitApp()
-	t.Log(sum.InquiryTypeDay("9"))
+	//t.Log(sum.InquiryTypeDay("9"))
+	t.Log(sum.DrugEveryDayNumber("7"))
 }

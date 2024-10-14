@@ -6,8 +6,8 @@ server:
 mysql:
   username: root
   password: 123456
-  host: localhost
-  port: 3306
+  host: 192.168.1.115
+  port: 33306
   database: med_health
   charset: utf8mb4
 
@@ -20,17 +20,17 @@ upload:
   ipfs: http://192.168.1.115:5001 # ipfs服务地址
 
 redis:
-  addr: 127.0.0.1:6379
+  addr: 192.168.1.115:26379
   password: ""
   db: 0
 
 # 合约配置文件
 contract:
   contract_name: MedHealth
-  contract_address: 0x69718b3ef765e9d22c74857f184d62b6fb25b9cc
+  contract_address: 0xb7276a8d9599240a09990c161644fd6afad1df43
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
-  owner: 0x31302447ba92dc24f74c5d90b04df90cfb34183e
-  server_host: "http://localhost:5002"
+  owner: 0xe98355235e06ee0598293cbca80fcd289afd6c81
+  server_host: "http://192.168.1.115:5002"
   trans_url: "/WeBASE-Front/trans/handle"
   parse_url: "/WeBASE-Front/tool/decode"
   account_url: "/WeBASE-Front/privateKey?type=0&userName="
@@ -63,7 +63,7 @@ ai: # AI
 
 mock: # Mock模拟数据生成服务
   open: true # 是否开启服务
-  abs_path: "/Users/ljn/Documents/blockchaincomplete/Internet+/back/asset/txt" #资源绝对路径
+  abs_path: "./asset/txt" #资源绝对路径
   asset_file_name: #随机资源文件名称
     # 随机问诊话术
     inquiry_detail: "inquiryDetail.txt"

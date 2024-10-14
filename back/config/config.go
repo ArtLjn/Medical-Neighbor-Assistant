@@ -38,9 +38,8 @@ type OriginConfig struct {
 		Ipfs    string `yaml:"ipfs"`
 	} `yaml:"upload"`
 	DefaultAdmin struct {
-		Username     string `yaml:"username"`
-		Password     string `yaml:"password"`
-		ChainAddress string `yaml:"chain_address"`
+		Username string `yaml:"username"`
+		Password string `yaml:"password"`
 	} `yaml:"defaultAdmin"`
 	Redis struct {
 		Addr     string `yaml:"addr"`

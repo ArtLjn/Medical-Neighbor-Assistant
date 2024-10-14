@@ -52,6 +52,7 @@ type Inquiry struct {
 	InquiryDetail   string `json:"inquiry_detail" gorm:"type:text;comment:问诊描述"`           // 问诊描述
 	IsInquiry       bool   `json:"is_inquiry" gorm:"type:tinyint(1);comment:是否已经问诊"`       // 是否已经问诊
 	IsReception     bool   `json:"is_reception" gorm:"type:tinyint(1);comment:是否已经接诊"`     // 是否已经接诊
+	IsAudit         bool   `json:"is_audit"  gorm:"type:tinyint(1);comment:是否已经审核"`
 }
 
 type Medical struct {

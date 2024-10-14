@@ -73,6 +73,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
+	github.com/siddontang/go-mysql-elasticsearch v0.0.0-20200822025838-fe261969558b // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

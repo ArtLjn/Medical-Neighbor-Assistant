@@ -17,10 +17,17 @@ import (
 func InitSumService(group *gin.RouterGroup) {
 	sumGroup := group.Group("sum")
 	sumGroup.GET("/getInquirySumTypeDay", GetInquirySumTypeDay)
+	sumGroup.GET("/getDrugSumTypeDay", GetDrugSumTypeDay)
 }
 
 func GetInquirySumTypeDay(ctx *gin.Context) {
 	day := ctx.DefaultQuery("day", "7")
 	inquirySumTypeDay := sum.InquiryTypeDay(day)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(inquirySumTypeDay).Build(ctx)
+}
+
+func GetDrugSumTypeDay(ctx *gin.Context) {
+	day := ctx.DefaultQuery("day", "7")
+	drugSumTypeDay := sum.DrugEveryDayNumber(day)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugSumTypeDay).Build(ctx)
 }

@@ -47,8 +47,14 @@ func QueryPatientAgentDrugHistory(ctx *gin.Context) {
 		return
 	}
 	raw := ctx.DefaultQuery("raw", "0")
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	p := ctx.DefaultQuery("page", "1")
+	s := ctx.DefaultQuery("size", "1000000")
+	if p == "" || s == "" {
+		p = "1"
+		s = "10000000"
+	}
+	page, _ := strconv.Atoi(p)
+	size, _ := strconv.Atoi(s)
 	drugList, err := drug.GetDrugRecord(raw, "patient", userMessage.UUID, page, size)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
@@ -72,8 +78,14 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 	}
 
 	raw := ctx.DefaultQuery("raw", "0")
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	p := ctx.DefaultQuery("page", "1")
+	s := ctx.DefaultQuery("size", "1000000")
+	if p == "" || s == "" {
+		p = "1"
+		s = "10000000"
+	}
+	page, _ := strconv.Atoi(p)
+	size, _ := strconv.Atoi(s)
 	drugList, err := drug.GetDrugRecord(raw, "physician", userMessage.UUID, page, size)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)

@@ -32,6 +32,7 @@ func InitInquiryService(group *gin.RouterGroup) {
 		inquiryGroup.GET("/queryAllInquiryRecord", QueryAllInquiryRecord)
 		inquiryGroup.PUT("/physicianReception", PhysicianReception)
 		inquiryGroup.GET("/queryInquiryRecordById", QueryInquiryRecordById)
+		inquiryGroup.GET("/likeQueryInquiryRecord", LikeQueryInquiryRecord)
 	}
 }
 
@@ -61,7 +62,7 @@ func CreateInquiryRecord(ctx *gin.Context) {
 }
 
 // QueryAllInquiryRecord 查询所有问诊记录: 管理员使用
-// @param isInquiry 1: 已经问诊结束 2: 未问诊 3: 未指派医师 4: 代接诊
+// @param isInquiry 1: 已经问诊结束 2: 未问诊 3: 未指派医师 4: 代接诊 5: 问诊结束未审核的记录
 func QueryAllInquiryRecord(ctx *gin.Context) {
 	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
@@ -79,8 +80,14 @@ func QueryPatientInquiryRecord(ctx *gin.Context) {
 		return
 	}
 	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	p := ctx.DefaultQuery("page", "1")
+	s := ctx.DefaultQuery("size", "1000000")
+	if p == "" || s == "" {
+		p = "1"
+		s = "10000000"
+	}
+	page, _ := strconv.Atoi(p)
+	size, _ := strconv.Atoi(s)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
 		SetMsg("success").SetData(Inquiry.QueryPatientInquiryRecord(userMessage.UUID, isInquiry, page, size)).Build(ctx)
 }
@@ -94,8 +101,14 @@ func QueryPhysicianInquiryRecord(ctx *gin.Context) {
 		return
 	}
 	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	p := ctx.DefaultQuery("page", "1")
+	s := ctx.DefaultQuery("size", "1000000")
+	if p == "" || s == "" {
+		p = "1"
+		s = "10000000"
+	}
+	page, _ := strconv.Atoi(p)
+	size, _ := strconv.Atoi(s)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").
 		SetData(Inquiry.QueryPhysicianInquiryRecord(userMessage.UUID, isInquiry, page, size)).Build(ctx)
 }
@@ -121,8 +134,11 @@ func ApproveInquiryRecord(ctx *gin.Context) {
 	if !inquiryRecord.IsReception {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录未被接诊").Build(ctx)
 		return
-	} else if inquiryRecord.IsInquiry {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录已经问诊结束").Build(ctx)
+	} else if !inquiryRecord.IsInquiry {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊并未登记问诊记录").Build(ctx)
+		return
+	} else if inquiryRecord.IsAudit {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("该问诊记录已经审核").Build(ctx)
 		return
 	}
 	medicalRecord := medical.QueryMedicalByCond(map[string]interface{}{
@@ -197,4 +213,18 @@ func PhysicianReception(ctx *gin.Context) {
 		return
 	}
 	response.PublicResponse.NewBuildSuccess(ctx)
+}
+
+func LikeQueryInquiryRecord(ctx *gin.Context) {
+	username := ctx.Query("username")
+	isPatient, _ := strconv.ParseBool(ctx.DefaultQuery("isPatient", "true"))
+	p := ctx.DefaultQuery("page", "1")
+	s := ctx.DefaultQuery("size", "1000000")
+	if p == "" || s == "" {
+		p = "1"
+		s = "10000000"
+	}
+	page, _ := strconv.Atoi(p)
+	size, _ := strconv.Atoi(s)
+	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(Inquiry.QueryLikeByCond(username, isPatient, page, size)).Build(ctx)
 }

@@ -74,6 +74,14 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account string, medicalIds ...*
 		return errors.New("创建失败")
 	}
 
+	inquiryRecord.IsInquiry = true
+	if err = tx.Updates(inquiryRecord).Error; err != nil {
+		// 如果更新失败，返回错误
+		tx.Rollback() // 回滚事务
+		log.Println(err)
+		return errors.New("更新失败")
+	}
+
 	// 如果患者需要代购药品
 	if receiver.IsNeedByDrug {
 		var physicianMessage, patientMessage model.Account

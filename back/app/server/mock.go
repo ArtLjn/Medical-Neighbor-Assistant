@@ -12,10 +12,12 @@ import (
 	"back/app/user"
 	"back/config"
 	"back/pkg/custom_error"
+	"back/pkg/data/model"
 	"back/pkg/response"
 	"github.com/gin-gonic/gin"
 	"path/filepath"
 	"strconv"
+	"sync"
 )
 
 func InitMockData(group *gin.RouterGroup) {
@@ -45,16 +47,26 @@ func GeneratePhysicianAccount(ctx *gin.Context) {
 	response.PublicResponse.SetCode(200).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
 }
 
+var (
+	mu            sync.RWMutex
+	patientList   []model.Account
+	physicianList []model.Account
+)
+
 func TestFullSystem(ctx *gin.Context) {
-	number := ctx.Query("number")
-	num, _ := strconv.Atoi(number)
+	number := ctx.DefaultQuery("number", "1")
+	goroutineNumber := ctx.DefaultQuery("goroutineNumber", "1")
+	num, err := strconv.Atoi(number)
+	if err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("无效的数字参数").Build(ctx)
+		return
+	}
+	goroutineNum, err := strconv.Atoi(goroutineNumber)
+	if err != nil {
+		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("无效的协程数量").Build(ctx)
+		return
+	}
 	mockConf := config.LoadConfig.Mock
-	defer func() {
-		if err := recover(); err != nil {
-			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.ReadAssetError).Build(ctx)
-			return
-		}
-	}()
 
 	// 定义一个通用的文件读取函数，减少代码重复
 	readFile := func(filePath string) ([]string, error) {
@@ -64,6 +76,13 @@ func TestFullSystem(ctx *gin.Context) {
 		}
 		return data, nil
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.ReadAssetError).Build(ctx)
+			return
+		}
+	}()
 
 	// 创建一个 map 存储文件内容，key 是文件名称，value 是读取到的内容
 	fileContentMap := make(map[string][]string)
@@ -85,12 +104,18 @@ func TestFullSystem(ctx *gin.Context) {
 	}
 
 	// 查询所有患者和医生
-	patientList := user.QueryAllPatient()
-	physicianList := user.QueryAllPhysician()
+	mu.Lock()
+	patientList = user.QueryAllPatient()
+	physicianList = user.QueryAllPhysician()
+	mu.Unlock()
 
-	go mock.RunSystem(fileContentMap["InquiryDetail"],
-		fileContentMap["InquiryVideo"], fileContentMap["MedicalImg"],
-		fileContentMap["DrugDeliverCertificate"], patientList, physicianList, num)
+	for i := 0; i < goroutineNum; i++ {
+		go func(i int) {
+			mock.RunSystem(fileContentMap["InquiryDetail"],
+				fileContentMap["InquiryVideo"], fileContentMap["MedicalImg"],
+				fileContentMap["DrugDeliverCertificate"], patientList, physicianList, num)
+		}(i)
+	}
 
 	// 返回读取到的文件内容的某些信息给前端
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)

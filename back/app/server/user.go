@@ -38,7 +38,7 @@ func InitUserService(group *gin.RouterGroup) {
 	userGroup.GET("/logOut", LogOut)
 	userGroup.GET("/verifyToken", VerifyToken)
 	userGroup.GET("/queryUserMessage", QueryUserMessage)
-
+	userGroup.GET("/likeAccountByCV", LikeAccountByCV)
 }
 
 // Login 登录接口
@@ -134,7 +134,7 @@ func QueryPatientInformation(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
-		SetMsg("success").SetData(user.QueryPatientPage(page, size, role.Patient)).Build(ctx)
+		SetMsg("success").SetData(user.QueryPage(page, size, role.Patient)).Build(ctx)
 }
 
 // QueryDoctorInformation 查询医生信息
@@ -142,7 +142,7 @@ func QueryDoctorInformation(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
-		SetMsg("success").SetData(user.QueryPatientPage(page, size, role.Physician)).Build(ctx)
+		SetMsg("success").SetData(user.QueryPage(page, size, role.Physician)).Build(ctx)
 }
 
 // UpdatePatientInformation 更新病人信息
@@ -226,4 +226,12 @@ func LogOut(ctx *gin.Context) {
 
 	token.TokenF.LogOutToken(authorization)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
+}
+
+func LikeAccountByCV(ctx *gin.Context) {
+	cond, val := ctx.DefaultQuery("cond", "username"), ctx.DefaultQuery("val", "123")
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	response.PublicResponse.SetCode(custom_error.SuccessCode).
+		SetMsg("success").SetData(user.LikeQuery(cond, val, page, size)).Build(ctx)
 }

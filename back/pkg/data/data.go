@@ -20,6 +20,11 @@ import (
 	"log"
 )
 
+const (
+	FamilyMedicalTreatment    = "在家就医"
+	CommunityMedicalTreatment = "社区就医"
+)
+
 var (
 	Db               *gorm.DB
 	Rdb              *redis.Client

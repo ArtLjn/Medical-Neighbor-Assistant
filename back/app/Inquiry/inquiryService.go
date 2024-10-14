@@ -20,16 +20,12 @@ import (
 	"sync"
 )
 
-const (
-	FamilyMedicalTreatment    = "家庭就医"
-	CommunityMedicalTreatment = "社区就医"
-)
-
 func CreateInquiry(chainAccount string, bean bo.CreateInquiryBo) (uint, error) {
 	var inquiry model.Inquiry
 	util.BeanUtil.CopyProperties(bean, &inquiry)
 	inquiry.IsInquiry = false
 	inquiry.IsReception = false
+	inquiry.IsAudit = false
 	tx := data.Db.Begin()
 	if err := tx.Create(&inquiry).Error; err != nil {
 		tx.Rollback()
@@ -39,7 +35,7 @@ func CreateInquiry(chainAccount string, bean bo.CreateInquiryBo) (uint, error) {
 
 	r, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount, "patientRegistrationInquiry", []interface{}{
 		inquiry.ID,
-		FamilyMedicalTreatment,
+		bean.Type,
 	}))
 	if !r && e != nil {
 		tx.Rollback()
@@ -81,10 +77,11 @@ const (
 	InquiryFalse
 	NoAppoint
 	Pending
+	NoAudit
 )
 
 func QueryAllInquiry(isInquiry, page, size int) map[string]interface{} {
-	query := data.Db.Model(model.Inquiry{})
+	query := data.Db.Model(model.Inquiry{}).Order("id DESC")
 	switch isInquiry {
 	case InquiryTrue:
 		// 查询已经问诊结束的记录
@@ -98,12 +95,16 @@ func QueryAllInquiry(isInquiry, page, size int) map[string]interface{} {
 	case Pending:
 		// 查询已经指派医师但是医师暂时没有接诊的记录
 		query = query.Where("physician != ?", "").Where("is_reception = ?", false)
+	case NoAudit:
+		query = query.Where("is_inquiry = ?", true).Where("is_audit = ?", false)
+	default:
+
 	}
 	return transferPage(query, page, size)
 }
 
 func QueryPhysicianInquiryRecord(uuid string, isInquiry, page, size int) map[string]interface{} {
-	query := data.Db.Model(model.Inquiry{}).Where("physician = ?", uuid)
+	query := data.Db.Model(model.Inquiry{}).Order("id DESC").Where("physician = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
@@ -119,7 +120,7 @@ func QueryPhysicianInquiryRecord(uuid string, isInquiry, page, size int) map[str
 }
 
 func QueryPatientInquiryRecord(uuid string, isInquiry, page, size int) map[string]interface{} {
-	query := data.Db.Model(model.Inquiry{}).Where("patient = ?", uuid)
+	query := data.Db.Model(model.Inquiry{}).Order("id DESC").Where("patient = ?", uuid)
 	switch isInquiry {
 	case InquiryTrue:
 		query = query.Where("is_inquiry = ?", true)
@@ -139,7 +140,7 @@ func transferPage(query *gorm.DB, page, size int) map[string]interface{} {
 	offset := (page - 1) * size
 	// 先执行 Count 查询总数
 	if err := query.Count(&total).Error; err != nil {
-		log.Printf("query heritage count error: %v", err)
+		log.Printf("query count error: %v", err)
 		return nil
 	}
 	if err := query.Offset(offset).Limit(size).Find(&inquiry).Error; err != nil {
@@ -160,7 +161,7 @@ func UpdateIsInquiry(id string) error {
 		log.Println(e)
 		return e
 	}
-	if err := data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("is_inquiry", true).Error; err != nil {
+	if err := data.Db.Model(&model.Inquiry{}).Where("id = ?", id).Update("is_audit", true).Error; err != nil {
 		log.Println(err)
 		return fmt.Errorf("update inquiry failed")
 	}
@@ -290,4 +291,16 @@ func TransferToInquiryVo(receiver model.Inquiry) vo.QueryInquiryVo {
 	util.BeanUtil.CopyProperties(physician, &inquiryVo.Physician)
 
 	return inquiryVo
+}
+
+func QueryLikeByCond(username string, isPatient bool, page, size int) map[string]interface{} {
+	query := data.Db.Model(&model.Inquiry{}) // 假设model.Inquiry是你的Inquiry模型
+	if isPatient {
+		query = query.Joins("JOIN account a ON a.uuid = inquiry.patient")
+	} else {
+		query = query.Joins("JOIN account a ON a.uuid = inquiry.physician")
+	}
+	query = query.Where("a.username LIKE ?", "%"+username+"%")
+
+	return transferPage(query, page, size)
 }

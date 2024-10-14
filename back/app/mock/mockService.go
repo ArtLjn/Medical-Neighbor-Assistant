@@ -20,6 +20,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -129,31 +130,20 @@ func LoadMoreDoctorAccount(number int) {
 	user.WritePhysicianToDB(accounts)
 }
 
+var rng = rand.New(rand.NewSource(time.Now().UnixNano())) // 使用线程安全的随机数生成器
+
 // RunSystem 普通的系统模拟方法
-func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCertificateList []string, patientList []model.Account, physicianList []model.Account, testNumber int) {
+func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
+	drugDeliverCertificateList []string, patientList []model.Account, physicianList []model.Account, testNumber int) {
+	var mu sync.RWMutex
 	for i := 0; i < testNumber; i++ {
+		mu.RLock() // 读取锁
 		// 随机选择患者和医生
-		patientAccount := patientList[rand.Intn(len(patientList))]
-		physicianAccount := physicianList[rand.Intn(len(physicianList))]
-
-		// 创建登录请求
-		patientLoginForm := bo.LoginBo{
-			Phone:    patientAccount.Phone,
-			Password: patientAccount.Password,
-		}
-		physicianLoginForm := bo.LoginBo{
-			Phone:    physicianAccount.Phone,
-			Password: physicianAccount.Password,
-		}
-
-		// 模拟登录操作
-		_, err := user.AccountLogin(patientLoginForm)
-		_, err = user.AccountLogin(physicianLoginForm)
-		if err != nil {
-			log.Printf("登录失败: %v", err)
-			continue
-		}
-
+		patientIndex := rng.Intn(len(patientList)) // 使用线程安全的随机数生成器
+		physicianIndex := rng.Intn(len(physicianList))
+		patientAccount := patientList[patientIndex]
+		physicianAccount := physicianList[physicianIndex]
+		mu.RUnlock() // 释放读取锁
 		// 创建问诊
 		inquiryId, err := Inquiry.CreateInquiry(patientAccount.ChainAccount, bo.CreateInquiryBo{
 			Patient:         patientAccount.UUID,

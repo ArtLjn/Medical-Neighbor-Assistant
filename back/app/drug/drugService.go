@@ -130,7 +130,7 @@ func GetDrugRecord(raw, cond, val string, page, size int) (map[string]interface{
 		medical    = model.Medical{}
 		drugRecord = model.Drug{}
 	)
-	query := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
+	query := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).Order("d.id DESC").
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
 			"d.id as drug_id,"+
