@@ -157,3 +157,10 @@ func AskAiSumUpInquiry(record string) (string, error) {
 
 	return content, nil
 }
+
+func ClearChatRecord(uuid string) {
+	_, err := data.FastGptChatItems.DeleteMany(context.Background(), bson.M{"chatId": uuid})
+	if err != nil {
+		log.Println("DeleteMany err:", err)
+	}
+}

@@ -230,8 +230,8 @@ func AccountLogin(receiver bo.LoginBo) (vo.LoginResponseVo, error) {
 
 // LikeQuery  查询用户信息
 // 这段代码定义了一个名为 LikeQuery 的函数，该函数接收两个参数：c 和 v。
-func LikeQuery(c, v interface{}, page, size int) map[string]interface{} {
-	query := data.Db.Model(model.Account{}).
+func LikeQuery(c, v interface{}, page, size int, role string) map[string]interface{} {
+	query := data.Db.Model(model.Account{}).Where("role = ?", role).
 		Where(fmt.Sprintf("%s like ?", c), "%"+v.(string)+"%")
 	return transferPage(query, page, size)
 }

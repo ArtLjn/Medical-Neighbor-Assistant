@@ -79,7 +79,6 @@ func registerService(r *gin.Engine) {
 		data.FastGptChatItems = data.NewFastGptChatItems()
 		server.InitAiService(publicGroup)
 	}
-	//data.SyncMysqlAndElasticSearch()
 }
 
 func graceStop(srv *http.Server) {

@@ -55,7 +55,6 @@ func (r *ResponseBuild) Clear() {
 func (r *ResponseBuild) Build(ctx *gin.Context) {
 	ctx.JSON(r.code, gin.H{"code": r.code, "msg": r.msg, "data": r.data})
 	r.Clear()
-	ctx.Abort()
 	return
 }
 

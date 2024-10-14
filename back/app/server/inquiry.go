@@ -45,6 +45,7 @@ func CreateInquiryRecord(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	inquiryRecord.ReservedPhone = userMessage.Phone
 	if err := ctx.ShouldBindJSON(&inquiryRecord); err != nil {
 		response.PublicResponse.NewBuildJsonError(ctx)
 		return

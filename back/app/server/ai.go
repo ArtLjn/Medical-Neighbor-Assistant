@@ -46,6 +46,7 @@ func getMedicalSum(ctx *gin.Context) {
 		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
+	ai.ClearChatRecord(userMessage.UUID)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(sumRecord).Build(ctx)
 	return
 }

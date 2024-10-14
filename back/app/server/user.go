@@ -232,6 +232,7 @@ func LikeAccountByCV(ctx *gin.Context) {
 	cond, val := ctx.DefaultQuery("cond", "username"), ctx.DefaultQuery("val", "123")
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	re := ctx.DefaultQuery("role", role.Patient)
 	response.PublicResponse.SetCode(custom_error.SuccessCode).
-		SetMsg("success").SetData(user.LikeQuery(cond, val, page, size)).Build(ctx)
+		SetMsg("success").SetData(user.LikeQuery(cond, val, page, size, re)).Build(ctx)
 }
