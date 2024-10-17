@@ -52,6 +52,7 @@ log:  # 日志管理服务
 
 ai: # AI
   url: http://192.168.1.115:3001/v1/chat/completions # 服务地址
+  model: glm-4
   authorization: Bearer sk-fastgptnb
   prompt:
     # 问诊总结话术
@@ -59,7 +60,7 @@ ai: # AI
   #是否开启聊天记录mongo监听
   watch_mongo_chat: true
   # AI服务总开关
-  open_ai_server: false
+  open_ai_server: true
 
 mock: # Mock模拟数据生成服务
   open: true # 是否开启服务

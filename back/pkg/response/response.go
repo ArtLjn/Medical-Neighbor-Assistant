@@ -12,8 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var PublicResponse ResponseBuild
-
 type BuildResponse interface {
 	SetCode(code int) BuildResponse
 	SetMsg(msg string) BuildResponse

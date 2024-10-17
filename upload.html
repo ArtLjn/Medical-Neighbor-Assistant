@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传文件到 IPFS</title>
+</head>
+<body>
+    <h1>上传文件到 IPFS</h1>
+    <input type="file" id="fileInput" />
+    <button id="uploadButton">上传</button>
+    <div id="response"></div>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', async () => {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("请先选择一个文件");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('http://110.42.244.244:5001/api/v0/add?stream-channels=true', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+                document.getElementById('response').innerText = `上传成功，CID: ${data.Hash}`;
+            } catch (error) {
+                document.getElementById('response').innerText = `上传失败: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

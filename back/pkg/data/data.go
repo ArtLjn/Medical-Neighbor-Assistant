@@ -30,6 +30,7 @@ var (
 	Rdb              *redis.Client
 	Cli              *mongo.Client
 	FastGptChatItems *mongo.Collection
+	FastGptChats     *mongo.Collection
 )
 
 func InitApp() {
@@ -87,4 +88,8 @@ func NewMongo(url ...string) *mongo.Client {
 
 func NewFastGptChatItems() *mongo.Collection {
 	return Cli.Database("fastgpt").Collection("chatitems")
+}
+
+func NewFastGptChats() *mongo.Collection {
+	return Cli.Database("fastgpt").Collection("chats")
 }

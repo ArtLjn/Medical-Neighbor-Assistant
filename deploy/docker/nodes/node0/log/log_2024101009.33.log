@@ -1,0 +1,9 @@
+error|2024-10-10 09:33:33.237583|[CHANNEL]Get ca basic failed
+warning|2024-10-10 09:36:17.416246|[CHANNEL][SESSION]onRead failed,value=335544539,message=short read
+warning|2024-10-10 09:36:17.416271|[CHANNEL]onClientRequest,errorCode=-1,what=Read failed, disconnect
+warning|2024-10-10 09:36:17.417003|async_shutdown,message=short read
+error|2024-10-10 09:37:30.552838|[CHANNEL]Get ca basic failed
+warning|2024-10-10 09:40:10.394709|[CHANNEL][SESSION]onRead failed,value=335544539,message=short read
+warning|2024-10-10 09:40:10.394844|[CHANNEL]onClientRequest,errorCode=-1,what=Read failed, disconnect
+warning|2024-10-10 09:40:10.394984|async_shutdown,message=short read
+error|2024-10-10 09:40:23.850606|[CHANNEL]Get ca basic failed

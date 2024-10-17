@@ -77,6 +77,7 @@ func registerService(r *gin.Engine) {
 	if config.LoadConfig.AI.OpenAiServer {
 		data.Cli = data.NewMongo()
 		data.FastGptChatItems = data.NewFastGptChatItems()
+		data.FastGptChats = data.NewFastGptChats()
 		server.InitAiService(publicGroup)
 	}
 }

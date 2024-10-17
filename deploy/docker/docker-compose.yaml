@@ -1,0 +1,95 @@
+# 一键部署开发环境docker-compose
+# 会启动必要的环境，包括mysql、redis、webase-front，以及最简单的两个链节点，并且都是被我优化后的fast版本，占用很少的资源，很低的内存
+# 注： 本开发环境建议linux系统配置: 2c4g
+# 可以按照自己的需求调整需要启动的服务，比如不需要mysql，可以注释掉mysql的配置
+#启动方法：docker-compose -p my_fisco_dev up -d
+# @Author: wangHaonan
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.0.32
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "${MYSQL_REFLECT_PORT}:3306"
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_CHARSET=utf8mb4
+    volumes:
+      - ./mysql/sql.sql:/docker-entrypoint-initdb.d/sql.sql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u root",
+          "-p123456"
+        ]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 15s
+    networks:
+      - my-network
+  # phpmyadmin https://hub.docker.com/_/phpmyadmin
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    hostname: phpmyadmin
+    ports:
+      - 8899:80
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - my-network
+  redis:
+    image: 'redis:latest'
+    # 失败后总是重启
+    restart: always
+    privileged: true
+    ports:
+      - '${REDIS_REFLECT_PORT}:6379'
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 15s
+      timeout: 15s
+      retries: 3
+  redis-admin:
+    # 管理员登录账号密码默认是：admin
+    image: 'aoyanfei/redis-admin'
+    ports:
+      - '9898:9898'
+  ipfs:
+    # ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://36.50.226.26:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
+    # ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
+    image: ipfs/go-ipfs:latest
+    container_name: ipfs_node
+    restart: always
+    ports:
+      - "4001:4001"
+      - "5008:5001"
+      - "8080:8080"
+    environment:
+      API_ALLOW_METHOD: '["PUT","POST"]'
+      API_ALLOW_ORIGIN: '["*"]'
+    volumes:
+      - ipfs_data:/data/ipfs
+volumes:
+  ipfs_data:
+
+
+networks:
+  my-network:
+    driver: bridge

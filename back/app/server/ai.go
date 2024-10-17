@@ -30,23 +30,27 @@ func InitAiService(group *gin.RouterGroup) {
 
 // getMedicalSum 获取病历总结
 func getMedicalSum(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求都创建新的 ResponseBuild
 	receiverCtxUser, exists := ctx.Get("user_message")
-	userMessage := receiverCtxUser.(model.Account)
 	if !exists {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
+		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+
+	userMessage := receiverCtxUser.(model.Account)
+
 	medicalSum, err := ai.GetUserAskInfo(userMessage.UUID)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg(err.Error()).Build(ctx)
+		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
+
 	sumRecord, err := ai.AskAiSumUpInquiry(medicalSum)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
+		res.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
+
 	ai.ClearChatRecord(userMessage.UUID)
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(sumRecord).Build(ctx)
-	return
+	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(sumRecord).Build(ctx)
 }

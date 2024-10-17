@@ -75,6 +75,7 @@ type OriginConfig struct {
 	}
 	AI struct {
 		Url           string `yaml:"url"`
+		Model         string `yaml:"model"`
 		Authorization string `yaml:"authorization"`
 		Prompt        struct {
 			SumUpInquiry string `yaml:"sum_up_inquiry"`

@@ -336,3 +336,17 @@ func TestWatchChatChange(t *testing.T) {
 	//go watchChatChanges(data.FastGptChatItems, "e044f432")
 	r.Run(":9090")
 }
+
+func TestDelChatItem(t *testing.T) {
+	InitConfig()
+	cli := data.
+		NewMongo("mongodb://myusername:mygptpassword@110.42.244.244:27017/fastgpt?authSource=admin&directConnection=true")
+	collection := cli.Database("fastgpt").Collection("chatitems")
+	if _, err := collection.DeleteMany(context.Background(), bson.M{"chatId": "123"}); err != nil {
+		t.Error(err)
+	}
+	col12 := cli.Database("fastgpt").Collection("chats")
+	if _, err := col12.DeleteMany(context.Background(), bson.M{"chatId": "123"}); err != nil {
+		t.Error(err)
+	}
+}

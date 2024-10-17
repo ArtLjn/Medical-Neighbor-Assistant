@@ -21,13 +21,15 @@ func InitSumService(group *gin.RouterGroup) {
 }
 
 func GetInquirySumTypeDay(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	day := ctx.DefaultQuery("day", "7")
 	inquirySumTypeDay := sum.InquiryTypeDay(day)
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(inquirySumTypeDay).Build(ctx)
+	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(inquirySumTypeDay).Build(ctx)
 }
 
 func GetDrugSumTypeDay(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	day := ctx.DefaultQuery("day", "7")
 	drugSumTypeDay := sum.DrugEveryDayNumber(day)
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugSumTypeDay).Build(ctx)
+	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugSumTypeDay).Build(ctx)
 }

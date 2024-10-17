@@ -80,7 +80,7 @@ func AskAiSumUpInquiry(record string) (string, error) {
 
 	// 准备请求数据
 	requestData := map[string]interface{}{
-		"model": "glm4",
+		"model": ai.Model,
 		"messages": []map[string]string{
 			{"role": "system", "content": ai.Prompt.SumUpInquiry},
 			{"role": "user", "content": record},
@@ -161,6 +161,9 @@ func AskAiSumUpInquiry(record string) (string, error) {
 func ClearChatRecord(uuid string) {
 	_, err := data.FastGptChatItems.DeleteMany(context.Background(), bson.M{"chatId": uuid})
 	if err != nil {
+		log.Println("DeleteMany err:", err)
+	}
+	if _, err := data.FastGptChats.DeleteMany(context.Background(), bson.M{"chatId": uuid}); err != nil {
 		log.Println("DeleteMany err:", err)
 	}
 }

@@ -15,9 +15,9 @@ mongo:
   url: "mongodb://myusername:mygptpassword@192.168.1.115:27017/fastgpt?authSource=admin&directConnection=true"
 
 upload:
-  domain: http://192.168.1.115:8080/ipfs/ # ipfs网管
+  domain: http://110.42.244.244:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
-  ipfs: http://192.168.1.115:5001 # ipfs服务地址
+  ipfs: http://110.42.244.244:5001 # ipfs服务地址
 
 redis:
   addr: 127.0.0.1:6379
@@ -52,6 +52,7 @@ log:  # 日志管理服务
 
 ai: # AI
   url: http://192.168.1.115:3001/v1/chat/completions # 服务地址
+  model: glm-4
   authorization: Bearer sk-fastgptnb
   prompt:
     # 问诊总结话术

@@ -20,4 +20,5 @@ const (
 	SystemErrorCode    = 500
 	ClientErrorCode    = 400
 	ForbiddenErrorCode = 401
+	NotFoundCode       = 404
 )

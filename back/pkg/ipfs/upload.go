@@ -2,16 +2,16 @@ package ipfs
 
 import (
 	"back/config"
+	"back/pkg/custom_error"
 	"back/pkg/response"
 	"back/pkg/util"
 	"fmt"
-	"mime/multipart"
-	"strings"
-	"sync"
-
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
+	"mime/multipart"
+	"strings"
 )
+
 
 // GinUploadImg 直接将文件上传到 IPFS
 func GinUploadImg(ctx *gin.Context) {
@@ -24,27 +24,24 @@ func GinUploadImg(ctx *gin.Context) {
 		return
 	} else if file.Size > size {
 		info := fmt.Sprintf("上传文件大小不能大于%s", u.MaxSize)
-		res.SetCode(400).SetMsg(info).SetData(nil).Build(ctx)
+		res.SetCode(custom_error.ClientErrorCode).SetMsg(info).SetData(nil).Build(ctx)
 		return
 	}
 	originName := file.Filename
 	lastDotIndex := strings.LastIndex(originName, ".")
 	if lastDotIndex == -1 {
-		res.SetCode(400).SetMsg("文件后缀获取失败").SetData(nil).Build(ctx)
+		res.SetCode(custom_error.ClientErrorCode).SetMsg("文件后缀获取失败").SetData(nil).Build(ctx)
 		return
 	}
-	var mx sync.Mutex
-	mx.Lock()
-	defer mx.Unlock()
 	// 调用 IPFS 上传函数
 	cid, err := uploadToIPFS(file)
 	if err != nil {
-		res.SetCode(500).SetMsg("文件上传到 IPFS 失败").SetData(nil).Build(ctx)
+		res.SetCode(custom_error.SystemErrorCode).SetMsg("文件上传到 IPFS 失败").SetData(nil).Build(ctx)
 		return
 	}
 
 	// 返回 IPFS CID
-	res.SetCode(200).SetMsg("上传成功").SetData(u.Domain + cid).Build(ctx)
+	res.SetCode(custom_error.SuccessCode).SetMsg("上传成功").SetData(u.Domain + cid).Build(ctx)
 }
 
 // uploadToIPFS 直接将文件流上传并固定到 IPFS

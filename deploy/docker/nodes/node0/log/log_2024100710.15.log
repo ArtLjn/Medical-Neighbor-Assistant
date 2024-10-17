@@ -1,0 +1,21 @@
+warning|2024-10-07 10:15:33.527838|[NETWORK][Session]doRead error,endpoint=127.0.0.1:48396,message=short read
+warning|2024-10-07 10:15:33.528813|[NETWORK][Session][drop] closing remote 127.0.0.1:48396,reason=Low-level TCP communication error.,endpoint=127.0.0.1:48396
+warning|2024-10-07 10:15:33.528906|[P2P][Service] disconnect error P2PSession,nodeID=05687aa9...,endpoint=127.0.0.1:48396,errorCode=3,what=Disconnect
+error|2024-10-07 10:15:33.529043|[NETWORK][Session]Session inactived
+error|2024-10-07 10:15:33.529067|[NETWORK][Session]Session inactived
+warning|2024-10-07 10:15:33.529077|[NETWORK][Session][drop] shutdown failed ,errorValue=9,message=Bad file descriptor
+warning|2024-10-07 10:15:33.528977|[P2P][Service] onDisconnect,errorCode=3,what=Dynamic exception type: dev::network::NetworkException
+std::exception::what: Disconnect
+
+warning|2024-10-07 10:15:36.720872|[g:1][CONSENSUS][PBFT]ViewChangeWarning: not caused by omit empty block ,v=64250,toV=64252,curNum=1,hash=871464e8...,nodeIdx=1,myNode=215dbd83...
+warning|2024-10-07 10:15:36.720901|[g:1][CONSENSUS][PBFT]Find disconnectedNode,disconnectedNodeSize=1,sessionSize=0,minValidNodes=2,connectedNodeList=,disconnectedNode=05687aa9..., ,idx=1
+error|2024-10-07 10:15:41.886539|[NETWORK][Host]TCP Connection refused by node,endpoint=127.0.0.1:30301,message=Connection refused
+warning|2024-10-07 10:15:41.886728|[P2P][Service] onConnect,errorCode=5,nodeID=00000000...,nodeName=,endpoint=unknown,what=Connect failed
+warning|2024-10-07 10:15:43.475500|[g:1][CONSENSUS][PBFT]ViewChangeWarning: not caused by omit empty block ,v=64250,toV=64253,curNum=1,hash=871464e8...,nodeIdx=1,myNode=215dbd83...
+warning|2024-10-07 10:15:43.475521|[g:1][CONSENSUS][PBFT]Find disconnectedNode,disconnectedNodeSize=1,sessionSize=0,minValidNodes=2,connectedNodeList=,disconnectedNode=05687aa9..., ,idx=1
+warning|2024-10-07 10:15:44.826070|[CHANNEL][SESSION]onRead failed,value=335544539,message=short read
+warning|2024-10-07 10:15:44.826098|[CHANNEL]onClientRequest,errorCode=-1,what=Read failed, disconnect
+warning|2024-10-07 10:15:44.826297|async_shutdown,message=short read
+warning|2024-10-07 10:15:51.570582|[CHANNEL]Accept failed,message=Operation canceled
+error|2024-10-07 10:15:51.886684|[NETWORK][Host]TCP Connection refused by node,endpoint=127.0.0.1:30301,message=Connection refused
+warning|2024-10-07 10:15:51.886849|[P2P][Service] onConnect,errorCode=5,nodeID=00000000...,nodeName=,endpoint=unknown,what=Connect failed

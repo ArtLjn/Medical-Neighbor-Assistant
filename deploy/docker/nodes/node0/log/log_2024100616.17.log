@@ -1,0 +1,7 @@
+error|2024-10-06 16:17:01.021587|[NETWORK][Host]TCP Connection refused by node,endpoint=127.0.0.1:30301,message=Connection refused
+warning|2024-10-06 16:17:01.021679|[P2P][Service] onConnect,errorCode=5,nodeID=00000000...,nodeName=,endpoint=unknown,what=Connect failed
+error|2024-10-06 16:17:01.022564|[NETWORK][Host]Get ca basic failed
+error|2024-10-06 16:17:01.024734|[NETWORK][Host]Get ca basic failed
+error|2024-10-06 16:17:01.105848|[NETWORK][Host]Get ca basic failed
+error|2024-10-06 16:17:11.022125|[NETWORK][Host]Get ca basic failed
+error|2024-10-06 16:17:12.915146|[CHANNEL]Get ca basic failed

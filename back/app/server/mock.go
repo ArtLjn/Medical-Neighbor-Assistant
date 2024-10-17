@@ -31,20 +31,23 @@ func InitMockData(group *gin.RouterGroup) {
 }
 
 func Ping(ctx *gin.Context) {
-	response.PublicResponse.NewBuildSuccess(ctx)
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	res.NewBuildSuccess(ctx)
 }
 func GeneratePatientAccount(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	number := ctx.Query("number")
 	num, _ := strconv.Atoi(number)
 	mock.LoadMorePatientAccount(num)
-	response.PublicResponse.SetCode(200).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
+	res.SetCode(200).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
 }
 
 func GeneratePhysicianAccount(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	number := ctx.Query("number")
 	num, _ := strconv.Atoi(number)
 	mock.LoadMoreDoctorAccount(num)
-	response.PublicResponse.SetCode(200).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
+	res.SetCode(200).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
 }
 
 var (
@@ -54,16 +57,17 @@ var (
 )
 
 func TestFullSystem(ctx *gin.Context) {
+	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	number := ctx.DefaultQuery("number", "1")
 	goroutineNumber := ctx.DefaultQuery("goroutineNumber", "1")
 	num, err := strconv.Atoi(number)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("无效的数字参数").Build(ctx)
+		res.SetCode(custom_error.ClientErrorCode).SetMsg("无效的数字参数").Build(ctx)
 		return
 	}
 	goroutineNum, err := strconv.Atoi(goroutineNumber)
 	if err != nil {
-		response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("无效的协程数量").Build(ctx)
+		res.SetCode(custom_error.ClientErrorCode).SetMsg("无效的协程数量").Build(ctx)
 		return
 	}
 	mockConf := config.LoadConfig.Mock
@@ -79,7 +83,7 @@ func TestFullSystem(ctx *gin.Context) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			response.PublicResponse.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.ReadAssetError).Build(ctx)
+			res.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.ReadAssetError).Build(ctx)
 			return
 		}
 	}()
@@ -118,5 +122,5 @@ func TestFullSystem(ctx *gin.Context) {
 	}
 
 	// 返回读取到的文件内容的某些信息给前端
-	response.PublicResponse.SetCode(custom_error.SuccessCode).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
+	res.SetCode(custom_error.SuccessCode).SetMsg("后台为您mock中，请耐心等待！").Build(ctx)
 }

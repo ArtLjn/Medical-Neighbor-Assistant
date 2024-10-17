@@ -42,6 +42,7 @@ func WithAuthorizationFilter() Option {
 
 func (a authorizationFilter) Apply() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 		// 检查请求路径是否需要授权
 		if IsPathInList(ctx.Request.URL.Path, config.LoadConfig.AuthorizationFilter.NeedAuthorizationApiList) {
 			var userUUID string
@@ -50,7 +51,7 @@ func (a authorizationFilter) Apply() gin.HandlerFunc {
 				authorization := ctx.GetHeader("Authorization")
 				if authorization == "" {
 					// 如果 token 为空，返回错误并终止请求
-					response.PublicResponse.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
+					res.SetCode(custom_error.ClientErrorCode).SetMsg("token不能为空").Build(ctx)
 					ctx.Abort()
 					return
 				}
@@ -58,7 +59,7 @@ func (a authorizationFilter) Apply() gin.HandlerFunc {
 				uuid, err := token.TokenF.VerifyToken(authorization)
 				if err != nil {
 					// token 验证失败，返回错误并终止请求
-					response.PublicResponse.SetCode(custom_error.ForbiddenErrorCode).SetMsg(err.Error()).Build(ctx)
+					res.SetCode(custom_error.ForbiddenErrorCode).SetMsg(err.Error()).Build(ctx)
 					ctx.Abort()
 					return
 				}
@@ -71,7 +72,7 @@ func (a authorizationFilter) Apply() gin.HandlerFunc {
 			})
 			if account == (model.Account{}) {
 				// 用户不存在，返回错误并终止请求
-				response.PublicResponse.SetCode(custom_error.ForbiddenErrorCode).SetMsg("用户不存在").Build(ctx)
+				res.SetCode(custom_error.ForbiddenErrorCode).SetMsg("用户不存在").Build(ctx)
 				ctx.Abort()
 				return
 			}
