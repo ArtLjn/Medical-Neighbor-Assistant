@@ -43,19 +43,19 @@ contract MedHealth {
 
     mapping(uint => DrugDelivery) drugDeliveryMapping;
 
+    // 用户注册
     function registerAccount(address accountAddress, string role, string uuid) public {
         require(accountMapping[accountAddress].accountAddress == 0x0, "账户已注册");
         accountMapping[accountAddress] = Account(accountAddress, role, uuid);
     }
-
+    // 用户信息查询
     function getAccount(address accountAddress) public view returns(address, string, string) {
         require(accountMapping[accountAddress].accountAddress != 0x0, "账户不存在");
-        Account account = accountMapping[accountAddress];
+        Account storage account = accountMapping[accountAddress];
         return (account.accountAddress, account.role, account.uuid);
     }
 
-
-    constructor() {
+    constructor() public {
         owner = msg.sender;
     }
 
@@ -72,7 +72,7 @@ contract MedHealth {
     function hospitalDisInquiry(uint id, address physicianAddress) public {
         require(inquiryMapping[id].id != 0, "问诊信息不存在");
         require(msg.sender == owner, "只有医院管理人员可以分配医师");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         inquiry.physicianAddress = physicianAddress;
         inquiry.supervisorAddress = msg.sender;
         inquiry.isDis = 1;
@@ -82,7 +82,7 @@ contract MedHealth {
     function physicianRecInquiry(uint id) public {
         require(inquiryMapping[id].id != 0, "问诊信息不存在");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("医师")), "此操作(接诊)只能医师使用");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         inquiry.isReception = 1;
     }
 
@@ -90,23 +90,24 @@ contract MedHealth {
     function physicianDiagnosisInquiry(uint id, string medicalHash, string videoHash) public {
         require(inquiryMapping[id].id != 0, "问诊信息不存在");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("医师")), "此操作(接诊)只能医师使用");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         inquiry.medicalHash = medicalHash;
         inquiry.videoHash = videoHash;
         inquiry.isDiagnosis = 1;
     }
 
+    // 医院审核问诊
     function hospitalReviewInquiry(uint id) public {
         require(inquiryMapping[id].id != 0, "问诊信息不存在");
         require(msg.sender == owner, "只有医院管理人员可以审核问诊");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         inquiry.isReview = 1;
     }
 
     //查询问诊
     function getInquiry(uint id)public view returns(uint, address, address, address, string, string, string, uint8, uint8, uint8,uint8){
         require(inquiryMapping[id].id != 0, "问诊信息不存在");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         return (inquiry.id, inquiry.patientAddress, inquiry.physicianAddress, inquiry.supervisorAddress, inquiry.inquiryType, inquiry.medicalHash, inquiry. videoHash, inquiry.isDis, inquiry.isReception, inquiry.isDiagnosis, inquiry.isReview);
     }
 
@@ -115,7 +116,7 @@ contract MedHealth {
     function patientRegDrugDelivery(uint id, uint inquiryId)public {
         require(drugDeliveryMapping[id].id == 0, "药品代买信息已存在，不能登记");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("患者")), "此操作(登记药品代买)只能患者使用");
-        Inquiry inquiry = inquiryMapping[id];
+        Inquiry storage inquiry = inquiryMapping[id];
         drugDeliveryMapping[id] = DrugDelivery(id, inquiryId, msg.sender, inquiry.physicianAddress, inquiry.supervisorAddress, "", 0,0,0);
     }
 
@@ -123,7 +124,7 @@ contract MedHealth {
     function physicianAcceptDrugDelivery(uint id) public {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("医师")), "此操作(登记药品代买)只能患者使用");
-        DrugDelivery drugDelivery = drugDeliveryMapping[id];
+        DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
         drugDelivery.isAccept = 1;
     }
 
@@ -131,7 +132,7 @@ contract MedHealth {
     function physicianDeliveryDrug(uint id, string certiHash) public {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("医师")), "此操作(登记药品代买)只能患者使用");
-        DrugDelivery drugDelivery = drugDeliveryMapping[id];
+        DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
         drugDelivery.certiHash = certiHash;
         drugDelivery.isdelivery = 1;
     }
@@ -140,13 +141,14 @@ contract MedHealth {
     function hospitalReviewDrugDelivery(uint id) public {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
         require(msg.sender == owner, "只有医院管理人员可以审核药品代买情况");
-        DrugDelivery drugDelivery = drugDeliveryMapping[id];
+        DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
         drugDelivery.isReview = 1;
     }
 
+    // 获取药品代买信息
     function getDrugDelivery(uint id) public view returns(uint, uint, address, address, address, string, uint8, uint8, uint8) {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
-        DrugDelivery drugDelivery = drugDeliveryMapping[id];
+        DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
         return (drugDelivery.id, drugDelivery.bindInquiryId, drugDelivery.patientAddress, drugDelivery.physicianAddress, drugDelivery.supervisorAddress,drugDelivery.certiHash, drugDelivery.isAccept, drugDelivery.isdelivery, drugDelivery.isReview);
     }
 }

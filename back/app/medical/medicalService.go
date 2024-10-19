@@ -36,7 +36,7 @@ func CreateMedical(receiver bo.MedicalUploadBo, account string) (uint, error) {
 	return medical.ID, nil
 }
 
-func CreateMedicalF(receiver bo.MedicalUploadBo, account string, medicalIds ...*uint) error {
+func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, medicalIds ...*uint) error {
 	// 开始事务
 	tx := data.Db.Begin()
 	defer func() {
@@ -96,12 +96,18 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account string, medicalIds ...*
 			log.Println(err)
 			return errors.New("查询失败")
 		}
+		var ct string
+		if len(createTime) == 0 {
+			ct = time.Now().Format("2006-01-02 15:04:05")
+		} else {
+			ct = createTime
+		}
 		// 创建药品
 		drugReceiver := model.Drug{
 			Patient:     inquiryRecord.Patient,
 			Physician:   inquiryRecord.Physician,
 			Hospital:    physicianMessage.Hospital,
-			CreateTime:  time.Now().Format("2006-01-02 15:04:05"),
+			CreateTime:  ct,
 			BindMedical: medicalId,
 			AlreadyBuy:  false,
 			IsReceive:   false,

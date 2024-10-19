@@ -18,14 +18,15 @@ import (
 	"back/pkg/util"
 	"context"
 	"errors"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
 )
 
 func main() {
@@ -40,7 +41,8 @@ func main() {
 	// 将 Gin 的日志输出指向同一个日志目标
 	gin.DefaultWriter = logger
 	r := gin.Default()
-
+	// CORS 中间件
+	r.Use(Cors)
 	srv := &http.Server{
 		Addr:    ":" + config.LoadConfig.Server.Port,
 		Handler: r,
@@ -52,7 +54,7 @@ func main() {
 	if config.LoadConfig.Server.GraceStop {
 		graceStop(srv)
 	} else {
-		err := r.Run(srv.Addr)
+		err = r.Run(srv.Addr)
 		if err != nil {
 			return
 		}
@@ -136,4 +138,15 @@ func Execute() {
 	}
 
 	cobra.CheckErr(rootCmd.Execute())
+}
+
+func Cors(c *gin.Context) {
+	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")                   // 允许所有来源
+	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS") // 允许的请求方法
+	c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")       // 允许的请求头
+	if c.Request.Method == http.MethodOptions {
+		c.AbortWithStatus(http.StatusNoContent) // 处理预检请求
+		return
+	}
+	c.Next()
 }

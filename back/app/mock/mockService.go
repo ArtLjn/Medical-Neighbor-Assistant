@@ -145,12 +145,13 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
 		physicianAccount := physicianList[physicianIndex]
 		mu.RUnlock() // 释放读取锁
 		// 创建问诊
+		publicTime := GenerateAppointTime()
 		inquiryId, err := Inquiry.CreateInquiry(patientAccount.ChainAccount, bo.CreateInquiryBo{
 			Patient:         patientAccount.UUID,
 			Type:            []string{"在家就医", "社区就医"}[rand.Intn(2)],
 			InquiryDetail:   GenerateDetail(inquiryDetails),
 			ReservedPhone:   patientAccount.Phone,
-			AppointmentTime: GenerateAppointTime(),
+			AppointmentTime: publicTime,
 		})
 		if err != nil {
 			log.Printf("创建问诊失败: %v", err)
@@ -177,7 +178,7 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
 			InquiryVideo:          GenerateDetail(inquiryVideoList),
 			MedicalImg:            GenerateDetail(medicalImgList),
 			IsNeedByDrug:          true,
-		}, physicianAccount.ChainAccount, &medicalId); err != nil {
+		}, physicianAccount.ChainAccount, publicTime, &medicalId); err != nil {
 			log.Printf("上传医疗文件失败: %v", err)
 			continue
 		}
@@ -235,9 +236,12 @@ func GenerateDetail(details []string) string {
 }
 
 func GenerateAppointTime() string {
-	// 假设您想要的随机时间范围是1小时到24小时之间
-	maxDuration := 24 * time.Hour
-	minDuration := 1 * time.Hour
+	// 设置随机种子，确保每次运行程序时生成的随机数不同
+	rand.Seed(time.Now().UnixNano())
+
+	// 假设您想要的随机时间范围是1分钟到7天之间
+	minDuration := -7 * 24 * time.Hour // 7天前
+	maxDuration := -1 * time.Minute    // 1分钟前
 
 	// 生成一个随机持续时间
 	randomDuration := time.Duration(rand.Int63n(int64(maxDuration-minDuration))) + minDuration
@@ -245,8 +249,8 @@ func GenerateAppointTime() string {
 	// 获取当前时间
 	currentTime := time.Now()
 
-	// 计算随机的未来时间
-	randomFutureTime := currentTime.Add(randomDuration).Format("2006-01-02 15:04:05")
+	// 计算随机的过去时间
+	randomPastTime := currentTime.Add(randomDuration).Format("2006-01-02 15:04:05")
 
-	return randomFutureTime
+	return randomPastTime
 }

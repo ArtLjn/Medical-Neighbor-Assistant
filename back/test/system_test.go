@@ -192,3 +192,27 @@ func TestSystem(t *testing.T) {
 	// 调用封装的方法
 	mock.RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCertificateList, patientList, physicianList, 20)
 }
+
+func GenerateAppointTime() string {
+	// 设置随机种子，确保每次运行程序时生成的随机数不同
+	rand.Seed(time.Now().UnixNano())
+
+	// 假设您想要的随机时间范围是1分钟到7天之间
+	minDuration := -7 * 24 * time.Hour // 7天前
+	maxDuration := -1 * time.Minute    // 1分钟前
+
+	// 生成一个随机持续时间
+	randomDuration := time.Duration(rand.Int63n(int64(maxDuration-minDuration))) + minDuration
+
+	// 获取当前时间
+	currentTime := time.Now()
+
+	// 计算随机的过去时间
+	randomPastTime := currentTime.Add(randomDuration).Format("2006-01-02 15:04:05")
+
+	return randomPastTime
+}
+
+func TestGenerateTime(t *testing.T) {
+	t.Log(GenerateAppointTime())
+}

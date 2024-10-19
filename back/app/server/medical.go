@@ -66,7 +66,7 @@ func MedicalRegistration(ctx *gin.Context) {
 		// 如果验证失败，返回错误
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
-	} else if err = medical.CreateMedicalF(receiver, userMessage.ChainAccount); err != nil {
+	} else if err = medical.CreateMedicalF(receiver, userMessage.ChainAccount, ""); err != nil {
 		// 如果创建失败，返回错误
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(err.Error()).Build(ctx)
 		return

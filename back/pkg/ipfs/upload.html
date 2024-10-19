@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IPFS Large File Merge Upload</title>
+  <script src="https://unpkg.com/ipfs-http-client/dist/index.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    #output { margin-top: 20px; }
+  </style>
+</head>
+<body>
+<h1>Upload and Merge Files to IPFS</h1>
+<input type="file" id="fileInput" multiple />
+<button id="uploadButton">Upload</button>
+<div id="progress"></div>
+<div id="output"></div>
+
+<script>
+  const { create } = window.IpfsHttpClient;
+  const ipfs = create({ url: 'http://110.42.244.244:5001' });
+
+  const CHUNK_SIZE = 1024 * 1024; // 1MB
+
+  function chunkFile(file) {
+    const chunks = [];
+    let start = 0;
+    while (start < file.size) {
+      const end = Math.min(start + CHUNK_SIZE, file.size);
+      chunks.push(file.slice(start, end));
+      start = end;
+    }
+    return chunks;
+  }
+
+  document.getElementById('uploadButton').addEventListener('click', async () => {
+    const fileInput = document.getElementById('fileInput');
+    const files = fileInput.files;
+    const cids = [];
+
+    for (const file of files) {
+      const chunks = chunkFile(file);
+      let uploadedChunks = 0;
+
+      for (const chunk of chunks) {
+        try {
+          const { cid } = await ipfs.add(chunk);
+          uploadedChunks++;
+          cids.push(cid.toString());
+          document.getElementById('output').innerHTML += `Uploaded chunk of ${file.name} with CID: ${cid}<br>`;
+          document.getElementById('progress').innerText = `Uploaded ${uploadedChunks} of ${chunks.length} chunks for ${file.name}`;
+        } catch (error) {
+          console.error('Upload error:', error);
+        }
+      }
+    }
+
+    document.getElementById('progress').innerText = 'All uploads complete!';
+
+    // 合并所有CID
+    const mergedData = [];
+    for (const cid of cids) {
+      const chunks = [];
+      for await (const chunk of ipfs.cat(cid)) {
+        chunks.push(chunk);
+      }
+      mergedData.push(Buffer.concat(chunks));
+    }
+
+    // 上传合并后的文件到IPFS
+    const finalFile = Buffer.concat(mergedData);
+    const { cid: finalCid } = await ipfs.add(finalFile);
+
+    // 打印合并后的CID
+    document.getElementById('output').innerHTML += `<strong>Merged file CID: ${finalCid}</strong><br>`;
+  });
+</script>
+</body>
+</html>
