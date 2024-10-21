@@ -36,6 +36,10 @@ func CreateMedical(receiver bo.MedicalUploadBo, account string) (uint, error) {
 	return medical.ID, nil
 }
 
+// CreateMedicalF 创建病历
+// receiver: 病历信息
+// account: 操作者账号
+// medicalIds: 返回病历id
 func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, medicalIds ...*uint) error {
 	// 开始事务
 	tx := data.Db.Begin()
@@ -64,6 +68,7 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, med
 
 	// 创建病历
 	medicalId, err := CreateMedical(receiver, account)
+	// 如果需要获取病历id
 	if len(medicalIds) > 0 {
 		*medicalIds[0] = medicalId
 	}
@@ -74,6 +79,7 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, med
 		return errors.New("创建失败")
 	}
 
+	// 更新问诊记录为已经就诊
 	inquiryRecord.IsInquiry = true
 	if err = tx.Updates(inquiryRecord).Error; err != nil {
 		// 如果更新失败，返回错误
@@ -84,6 +90,7 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, med
 
 	// 如果患者需要代购药品
 	if receiver.IsNeedByDrug {
+		// 查询医生和患者信息
 		var physicianMessage, patientMessage model.Account
 		if err = tx.Where("uuid = ?", inquiryRecord.Physician).First(&physicianMessage).Error; err != nil {
 			// 如果查询失败，返回错误
@@ -112,6 +119,7 @@ func CreateMedicalF(receiver bo.MedicalUploadBo, account, createTime string, med
 			AlreadyBuy:  false,
 			IsReceive:   false,
 		}
+		// 将药品代买信息写入数据库
 		if err = tx.Create(&drugReceiver).Error; err != nil {
 			// 如果创建失败，返回错误
 			tx.Rollback() // 回滚事务

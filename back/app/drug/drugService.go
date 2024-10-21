@@ -13,8 +13,9 @@ import (
 	"back/pkg/util"
 	"errors"
 	"fmt"
-	"gorm.io/gorm"
 	"log"
+
+	"gorm.io/gorm"
 )
 
 func QueryDrugRecord(cond map[string]interface{}) model.Drug {
@@ -24,16 +25,6 @@ func QueryDrugRecord(cond map[string]interface{}) model.Drug {
 	}
 	var drug model.Drug
 	query.First(&drug)
-	return drug
-}
-
-func QueryDrugRecordList(cond map[string]interface{}) []model.Drug {
-	query := data.Db
-	for k, v := range cond {
-		query = query.Where(k, v)
-	}
-	var drug []model.Drug
-	query.Find(&drug)
 	return drug
 }
 
@@ -53,6 +44,7 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 		acc     model.Account
 	)
 
+	// 查询药品信息，并关联查询相关表的信息
 	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
@@ -69,7 +61,9 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 	return result
 }
 
-func QueryAllDrug(page, size int) (map[string]interface{}, error) {
+// QueryAllDrug 查询所有药品
+func QueryAllDrug() []map[string]interface{} {
+	var results []map[string]interface{}
 	var (
 		drug    model.Drug
 		acc     model.Account
@@ -77,7 +71,8 @@ func QueryAllDrug(page, size int) (map[string]interface{}, error) {
 		inquiry model.Inquiry
 	)
 
-	query := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
+	// 查询药品记录，并关联查询患者和医生的账号信息
+	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, " +
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive," +
 			"d.id as drug_id," +
@@ -85,24 +80,35 @@ func QueryAllDrug(page, size int) (map[string]interface{}, error) {
 		Joins(fmt.Sprintf("JOIN %s as m ON d.bind_medical = m.id", medical.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
-		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName()))
-	return transferPage(query, page, size)
+		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName())).
+		Scan(&results).Error
+	if err != nil {
+		return nil
+	}
+	return results
 }
 
+// QueryDrugRecord 查询药品记录
+// param cond: 查询条件，例如：id, physician, patient
 func PhysicianAgentDrug(id, uuid, chainAccount string) error {
+	// 查询药品记录
 	drugRecord := QueryDrugRecord(map[string]interface{}{
 		"id":        id,
 		"physician": uuid,
 	})
+	// 查询药品记录是否已经购买
 	if drugRecord != (model.Drug{}) && drugRecord.AlreadyBuy {
 		return errors.New("already buy")
 	}
+	// 调用区块链接口，修改药品记录
 	r, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount,
 		"physicianAcceptDrugDelivery", []interface{}{id}))
+	// 如果修改失败，返回错误信息
 	if !r && e != nil {
 		log.Println(e)
 		return errors.New("修改区块链数据失败")
 	}
+	// 修改数据库数据,将already_buy字段设置为true,表示已经购买
 	if err := UpdateDrugRecord(map[string]interface{}{
 		"id":        id,
 		"physician": uuid,
@@ -186,13 +192,17 @@ func transferPage(query *gorm.DB, page, size int) (map[string]interface{}, error
 	return m, nil
 }
 
+// HospitalAgentDrug 审核药品上链
+// param: drugId 药品id
 func HospitalAgentDrug(drugId string) error {
+	// 审核药品上链
 	r, e := util.IsSuccessMsg(util.CommonEq(
 		"hospitalReviewDrugDelivery", []interface{}{drugId}))
 	if !r && e != nil {
 		log.Println(e)
 		return errors.New("审核上链失败")
 	}
+	// 修改数据库数据,将is_receive字段设置为true,表示药品已经接收
 	if err := UpdateDrugRecord(map[string]interface{}{
 		"id": drugId,
 	}, map[string]interface{}{
@@ -204,13 +214,21 @@ func HospitalAgentDrug(drugId string) error {
 	return nil
 }
 
+// PhysicianDrugDelivery 医生派送药品
+// param: drugId 药品id
+// param: certificate 派送证书
+// param: physicianUUID 医生uuid
+// param: chainAccount 链账户
 func PhysicianDrugDelivery(drugId, certificate, physicianUUID, chainAccount string) error {
+	// 派送上链
 	r, e := util.IsSuccessMsg(util.CommonEqByUser(chainAccount,
 		"physicianDeliveryDrug", []interface{}{drugId, certificate}))
+	// 如果派送上链失败,则返回错误信息
 	if !r && e != nil {
 		log.Println(e)
 		return errors.New("派送上链失败")
 	}
+	// 修改数据库数据,将delivery_certificate字段设置为certificate
 	if err := UpdateDrugRecord(map[string]interface{}{
 		"id":        drugId,
 		"physician": physicianUUID,

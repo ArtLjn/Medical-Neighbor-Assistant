@@ -14,6 +14,7 @@ import (
 	"back/pkg/data"
 	"back/pkg/data/model"
 	"back/pkg/response"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,20 +38,23 @@ func getMedicalSum(ctx *gin.Context) {
 		return
 	}
 
+	// 获取用户信息
 	userMessage := receiverCtxUser.(model.Account)
-
+	// 获取用户与Ai的对话记录
 	medicalSum, err := ai.GetUserAskInfo(userMessage.UUID)
+	// 如果获取失败，返回错误信息
 	if err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
-
+	// 如果获取成功，返回病历总结
 	sumRecord, err := ai.AskAiSumUpInquiry(medicalSum)
 	if err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
 		return
 	}
-
+	// 清空用户与Ai的对话记录
 	ai.ClearChatRecord(userMessage.UUID)
+	// 返回病历总结
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(sumRecord).Build(ctx)
 }

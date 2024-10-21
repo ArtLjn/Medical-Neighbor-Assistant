@@ -1,0 +1,55 @@
+{
+    "caliper": {
+        "blockchain": "fisco-bcos"
+    },
+    "fisco-bcos": {
+        "config": {
+            "privateKey": "bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd",
+            "account": "0x0ff8981ebc130c7874ac7093a4d0c0e3d4f36b08"
+        },
+        "network": {
+            "nodes": [
+                {
+                    "ip": "127.0.0.1",
+                    "rpcPort": "8545",
+                    "channelPort": "20200"
+                },
+                {
+                    "ip": "127.0.0.1",
+                    "rpcPort": "8546",
+                    "channelPort": "20201"
+                },
+                {
+                    "ip": "127.0.0.1",
+                    "rpcPort": "8547",
+                    "channelPort": "20202"
+                },
+                {
+                    "ip": "127.0.0.1",
+                    "rpcPort": "8548",
+                    "channelPort": "20203"
+                }
+            ],
+            "authentication": {
+                "key": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/sdk.key",
+                "cert": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/sdk.crt",
+                "ca": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/ca.crt"
+            },
+            "groupID": 1,
+            "timeout": 100000
+        },
+        "smartContracts": [
+            {
+                "id": "MedHealth",
+                "path": "./MedHealth.sol",
+                "language": "solidity",
+                "version": "v0"
+            }
+        ]
+    },
+    "info": {
+        "Version": "2.0.0",
+        "Size": "4 Nodes",
+        "Distribution": "Single Host"
+    }
+}

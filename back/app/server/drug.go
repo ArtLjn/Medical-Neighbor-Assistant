@@ -15,10 +15,11 @@ import (
 	"back/pkg/response"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"log"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func InitDrugService(group *gin.RouterGroup) {
@@ -106,11 +107,13 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 // HospitalAgentDrugConfirmReceipt 医院管理人员审核药品代买情况
 func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	// 获取订单id
 	id := ctx.Query("id")
 	if id == "" {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	//判断订单是否存在
 	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
 		"id": id,
 	})
@@ -118,6 +121,7 @@ func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg("Already receive").Build(ctx)
 		return
 	}
+	// 进行药品代买
 	if err := drug.HospitalAgentDrug(id); err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
@@ -128,17 +132,21 @@ func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
 // PhysiciansOrderAgentDrug 医师进行药品代买
 func PhysiciansOrderAgentDrug(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	// 获取用户信息
 	receiverUserMes, exists := ctx.Get("user_message")
 	userMessage := receiverUserMes.(model.Account)
+	//判断用户是否存在
 	if !exists {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	//获取药品id
 	id := ctx.Query("id")
 	if id == "" {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	//进行药品代买
 	if err := drug.PhysicianAgentDrug(id, userMessage.UUID, userMessage.ChainAccount); err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
@@ -149,18 +157,22 @@ func PhysiciansOrderAgentDrug(ctx *gin.Context) {
 // PhysiciansOrderDelivery 医师接单派送
 func PhysiciansOrderDelivery(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	// 获取用户信息，判断用户是否存在
 	receiverUserMes, exists := ctx.Get("user_message")
 	userMessage := receiverUserMes.(model.Account)
 	if !exists {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	//获取药品id和证书
 	id := ctx.Query("id")
 	certificate := ctx.Query("certificate")
+	// 判断药品id和证书是否存在
 	if id == "" || certificate == "" {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	// 进行药品派送，判断是否成功
 	if err := drug.PhysicianDrugDelivery(id, certificate, userMessage.UUID, userMessage.ChainAccount); err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
@@ -168,6 +180,7 @@ func PhysiciansOrderDelivery(ctx *gin.Context) {
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
 }
 
+// QueryDrug 查询药品信息
 func QueryDrugByID(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	id := ctx.Query("id")
@@ -175,7 +188,9 @@ func QueryDrugByID(ctx *gin.Context) {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+	// 根据药品id查询药品信息
 	drugRecord := drug.QueryDrugAndAccountMessage(id)
+	// 判断药品是否存在
 	if drugRecord == nil {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg("No such drug").Build(ctx)
 		return
@@ -183,13 +198,16 @@ func QueryDrugByID(ctx *gin.Context) {
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugRecord).Build(ctx)
 }
 
+// QueryDrugByMedicalId 根据病历查询药品信息
 func QueryDrugByMedicalId(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	// 获取病历id,判断病历id是否存在
 	medicalId := ctx.Query("medical_id")
 	if medicalId == "" {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
+
 	var (
 		result     map[string]interface{}
 		acc        = model.Account{}
@@ -197,6 +215,7 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 		medical    = model.Medical{}
 		drugRecord = model.Drug{}
 	)
+	// 根据病历id查询药品信息，并关联查询患者、医生、病历、药品信息
 	err := data.Db.Table(fmt.Sprintf("%s as d", drugRecord.TableName())).
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, "+
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive,"+
@@ -216,13 +235,7 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 }
 
 func QueryAllDrug(ctx *gin.Context) {
-	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
-	drugList, err := drug.QueryAllDrug(page, size)
-	if err != nil {
-		res.SetCode(custom_error.SystemErrorCode).SetMsg(custom_error.SystemError).Build(ctx)
-		return
-	}
+	drugList := drug.QueryAllDrug()
+	res := response.ResponseBuild{}
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
 }

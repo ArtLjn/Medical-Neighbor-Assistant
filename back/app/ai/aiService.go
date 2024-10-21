@@ -14,13 +14,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 	"io"
 	"log"
 	"net/http"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Mongo聊天记录结构体
 type Res struct {
 	ChatId string        `json:"chatId"`
 	Obj    string        `json:"obj"`
@@ -33,11 +35,14 @@ type HumanAndAi struct {
 	AI    interface{} `json:"ai"`
 }
 
+// GetUserAskInfo 获取用户提问信息
 func GetUserAskInfo(uuid string) (string, error) {
+	// 从MongoDb中读取用户提问信息
 	cur, err := data.FastGptChatItems.Find(context.Background(), bson.M{"chatId": uuid})
 	if err != nil {
 		return "", err
 	}
+	// 关闭游标
 	defer func(cur *mongo.Cursor, ctx context.Context) {
 		err = cur.Close(ctx)
 		if err != nil {
@@ -45,23 +50,38 @@ func GetUserAskInfo(uuid string) (string, error) {
 		}
 	}(cur, context.Background())
 
-	var mL []Res
+	var mL []Res // 定义一个数组用于存储查询结果
+	// 查询所有与用户相关聊天记录,并判断是否有错误
 	if err = cur.All(context.Background(), &mL); err != nil {
 		log.Println("cur.All err:", err)
 		return "", errors.New("cur.All err")
 	}
-
+	// 判断是否有数据
 	if len(mL) == 0 {
 		return "", errors.New("no data")
 	}
+	/**
+	[
+		{
+			"Human": "你好",
+			"AI": "你好，有什么可以帮助你的吗？"
+		}
+	]
+	**/
 	// 使用结构体来保证 human 在前，ai 在后
 	var askList []HumanAndAi
+	// 遍历数组，找到 human 和 ai 的对应关系
 	for i := 0; i < len(mL); i++ {
+		// 判断当前元素是否为 human
 		if mL[i].Obj == "Human" {
+			// 获取 human 的值
 			humanAsk := mL[i].Value[0]
 			i++
+			// 判断下一个元素是否为 ai
 			if i < len(mL) && mL[i].Obj == "AI" {
+				// 获取 ai 的值
 				aiReward := mL[i].Value[0]
+				// 将 human 和 ai 放入 askList 中
 				askList = append(askList, HumanAndAi{
 					Human: humanAsk,
 					AI:    aiReward,
@@ -75,7 +95,9 @@ func GetUserAskInfo(uuid string) (string, error) {
 	return string(strAskList), nil
 }
 
+// AskAiSumUpInquiry 调用 AI 模型，将用户提问信息总结成一句话
 func AskAiSumUpInquiry(record string) (string, error) {
+	// 获取 AI 配置
 	ai := config.LoadConfig.AI
 
 	// 准备请求数据
@@ -89,6 +111,7 @@ func AskAiSumUpInquiry(record string) (string, error) {
 
 	// 序列化请求数据
 	requestDataBytes, err := json.Marshal(requestData)
+	// 处理序列化错误
 	if err != nil {
 		log.Println("json.Marshal err:", err)
 		return "", err
@@ -123,7 +146,7 @@ func AskAiSumUpInquiry(record string) (string, error) {
 
 	// 解析响应 JSON
 	var responseData map[string]interface{}
-	if err := json.Unmarshal(body, &responseData); err != nil {
+	if err = json.Unmarshal(body, &responseData); err != nil {
 		log.Println("json.Unmarshal err:", err)
 		return "", err
 	}
@@ -158,7 +181,9 @@ func AskAiSumUpInquiry(record string) (string, error) {
 	return content, nil
 }
 
+// ClearChatRecord 清除聊天记录
 func ClearChatRecord(uuid string) {
+	// 根据用户uuid删除所有相关记录
 	_, err := data.FastGptChatItems.DeleteMany(context.Background(), bson.M{"chatId": uuid})
 	if err != nil {
 		log.Println("DeleteMany err:", err)

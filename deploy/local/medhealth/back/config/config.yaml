@@ -6,31 +6,31 @@ server:
 mysql:
   username: root
   password: 123456
-  host: 192.168.1.115
+  host: 192.168.1.106
   port: 23306
   database: med_health
   charset: utf8mb4
 
 mongo:
-  url: "mongodb://myusername:mygptpassword@192.168.1.115:27017/fastgpt?authSource=admin&directConnection=true"
+  url: "mongodb://myusername:mygptpassword@192.168.1.106:27017/fastgpt?authSource=admin&directConnection=true"
 
 upload:
-  domain: http://192.168.1.115:8080/ipfs/ # ipfs网管
+  domain: http://192.168.1.106:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
-  ipfs: http://192.168.1.115:5008 # ipfs服务地址
+  ipfs: http://192.168.1.106:5008 # ipfs服务地址
 
 redis:
-  addr: 192.168.1.115:26379
+  addr: 192.168.1.106:26379
   password: ""
   db: 0
 
 # 合约配置文件
 contract:
   contract_name: MedHealth
-  contract_address: 0xb7276a8d9599240a09990c161644fd6afad1df43
+  contract_address: 0x18ae9a2baccbbd64779f29203cbb289b8d8be42c
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
-  owner: 0xe98355235e06ee0598293cbca80fcd289afd6c81
-  server_host: "http://192.168.1.115:5002"
+  owner: 0xe4707ecaf87dfc5df940f30b5d33086c73467142
+  server_host: "http://192.168.1.106:5002"
   trans_url: "/WeBASE-Front/trans/handle"
   parse_url: "/WeBASE-Front/tool/decode"
   account_url: "/WeBASE-Front/privateKey?type=0&userName="
@@ -51,7 +51,7 @@ log:  # 日志管理服务
   backup: 7 #保留旧的文件个数
 
 ai: # AI
-  url: http://192.168.1.115:3001/v1/chat/completions # 服务地址
+  url: http://192.168.1.106:3001/v1/chat/completions # 服务地址
   model: glm-4
   authorization: Bearer sk-fastgptnb
   prompt:
