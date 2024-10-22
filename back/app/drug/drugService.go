@@ -72,7 +72,7 @@ func QueryAllDrug() []map[string]interface{} {
 	)
 
 	// 查询药品记录，并关联查询患者和医生的账号信息
-	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).
+	err := data.Db.Table(fmt.Sprintf("%s as d", drug.TableName())).Order("d.id desc").
 		Select("i.patient, i.appointment_time, i.reserved_phone, i.physician, i.type, i.inquiry_detail, i.is_inquiry, i.is_reception, " +
 			"m.diagnostic_description, m.inquiry_video, m.medical_img, d.hospital, d.create_time, d.already_buy, d.delivery_certificate, d.is_receive," +
 			"d.id as drug_id," +

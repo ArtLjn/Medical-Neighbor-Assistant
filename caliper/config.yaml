@@ -14,8 +14,8 @@
 
 ---
 test:
-  name: New Energy
-  description: This is a NewEnergy benchmark of FISCO BCOS for caliper
+  name: MedHealth
+  description: This is a MedHealth benchmark of FISCO BCOS for caliper
   clients:
     type: local
     number: 1
@@ -23,7 +23,7 @@ test:
     - label: account-register
       description: Test performance of <registerAccount> name
       txNumber:
-        - 10
+        - 100
       rateControl:
         - type: fixed-rate
           opts:
@@ -32,7 +32,7 @@ test:
     - label: get-account
       description: Test performance of <getAccount> name
       txNumber:
-        - 10
+        - 100
       rateControl:
         - type: fixed-rate
           opts:
@@ -41,16 +41,12 @@ test:
 
 monitor:
   type:
-    - docker
     - process
-  docker:
-    name:
-      - node0
-      - node1
-      - node2
-      - node3
   process:
     - command: node
       arguments: fiscoBcosClientWorker.js
       multiOutput: avg
+      options:
+        host: 127.0.0.1
+        port: 8545
   interval: 0.5

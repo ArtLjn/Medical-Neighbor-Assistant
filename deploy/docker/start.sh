@@ -27,7 +27,7 @@ if [ "$isok" -eq 0 ]; then
   echo -e "\033[31m Error: Just kidding with you,This is not an error,If you don't understand, you must not have passed level four,Ha Ha Ha,\n \tBut please thank Wang Haonan... \033[0m"
 fi
 echo "配置ipfs跨域中..."
-docker exec ipfs_node ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://192.168.1.115:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
+docker exec ipfs_node ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://192.168.1.106:5008", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
 docker exec ipfs_node ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
 docker restart ipfs_node
 echo "配置ipfs跨域完成"

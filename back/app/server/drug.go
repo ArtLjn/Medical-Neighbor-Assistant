@@ -235,7 +235,7 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 }
 
 func QueryAllDrug(ctx *gin.Context) {
-	drugList := drug.QueryAllDrug()
 	res := response.ResponseBuild{}
+	drugList := drug.QueryAllDrug()
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(drugList).Build(ctx)
 }

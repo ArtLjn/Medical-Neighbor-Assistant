@@ -29,7 +29,7 @@ module.exports.init = function (blockchain, context, args) {
 // 生成交易负载，用于注册账户
 function generateWorkload() {
     let workload = [];
-    // 生成10笔交易，每笔交易注册一个账户
+    // 使用循环将注册信息写入数组   
     for (let i = 0; i < txnPerBatch; i++) {
         // 编写交易字段
         let w = {

@@ -4,8 +4,8 @@
     },
     "fisco-bcos": {
         "config": {
-            "privateKey": "bcec428d5205abe0f0cc8a734083908d9eb8563e31f943d760786edf42ad67dd",
-            "account": "0x0ff8981ebc130c7874ac7093a4d0c0e3d4f36b08"
+            "privateKey": "f1271aebd0bb584ded270286c0efe129217f530aae8d84116af6830a1398df8d",
+            "account": "0x169185fb3aca2aa1967f33c6fc4f745acfbea436"
         },
         "network": {
             "nodes": [
@@ -18,22 +18,12 @@
                     "ip": "127.0.0.1",
                     "rpcPort": "8546",
                     "channelPort": "20201"
-                },
-                {
-                    "ip": "127.0.0.1",
-                    "rpcPort": "8547",
-                    "channelPort": "20202"
-                },
-                {
-                    "ip": "127.0.0.1",
-                    "rpcPort": "8548",
-                    "channelPort": "20203"
                 }
             ],
             "authentication": {
-                "key": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/sdk.key",
-                "cert": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/sdk.crt",
-                "ca": "/home/arthur/fisco-bcos/nodes/127.0.0.1/sdk/ca.crt"
+                "key": "/Users/ljn/Documents/fisco/nodes/127.0.0.1/sdk/sdk.key",
+                "cert": "/Users/ljn/Documents/fisco/nodes/127.0.0.1/sdk/sdk.crt",
+                "ca": "/Users/ljn/Documents/fisco/nodes/127.0.0.1/sdk/ca.crt"
             },
             "groupID": 1,
             "timeout": 100000

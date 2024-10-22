@@ -89,7 +89,6 @@ services:
 volumes:
   ipfs_data:
 
-
 networks:
   my-network:
     driver: bridge

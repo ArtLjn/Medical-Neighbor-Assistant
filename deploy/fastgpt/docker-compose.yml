@@ -116,7 +116,6 @@ services:
       - STORE_LOG_LEVEL=warn
     volumes:
       - ./config.json:/app/data/config.json
-
   # oneapi
   mysql:
     image: registry.cn-hangzhou.aliyuncs.com/fastgpt/mysql:8.0.36 # 阿里云

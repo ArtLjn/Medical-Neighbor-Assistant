@@ -151,4 +151,14 @@ contract MedHealth {
         DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
         return (drugDelivery.id, drugDelivery.bindInquiryId, drugDelivery.patientAddress, drugDelivery.physicianAddress, drugDelivery.supervisorAddress,drugDelivery.certiHash, drugDelivery.isAccept, drugDelivery.isdelivery, drugDelivery.isReview);
     }
+    // 删除药品代买记录
+    function removeInquiryRecord(uint id) public {
+        require(msg.sender == owner,"必须是管理员用户调用");
+        delete(inquiryMapping[id]);
+    }
+
+    function removeDrugRecord(uint id) public {
+        require(msg.sender == owner,"必须是管理员用户调用");
+        delete(drugDeliveryMapping[id]);
+    }
 }
