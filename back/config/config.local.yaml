@@ -1,6 +1,8 @@
 server:
   host: 0.0.0.0
   port: 8088
+  proxy_url: http://192.168.1.106:8099/ipfs/
+  proxy_port: 8099
   grace_stop: false # 优雅停止
 
 mysql:
@@ -18,6 +20,7 @@ upload:
   domain: http://192.168.1.106:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
   ipfs: http://192.168.1.106:5001 # ipfs服务地址
+  backup: "./asset/cid/"
 
 redis:
   addr: 192.168.1.106:26379
@@ -64,7 +67,7 @@ ai: # AI
 
 mock: # Mock模拟数据生成服务
   open: true # 是否开启服务
-  abs_path: "/Users/ljn/Documents/blockchaincomplete/Internet+/back/asset/txt" #资源绝对路径
+  abs_path: "./asset/txt" #资源绝对路径
   asset_file_name: #随机资源文件名称
     # 随机问诊话术
     inquiry_detail: "inquiryDetail.txt"

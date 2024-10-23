@@ -22,6 +22,8 @@ type OriginConfig struct {
 	Server struct {
 		Host      string `yaml:"host"`
 		Port      string `yaml:"port"`
+		ProxyUrl  string `yaml:"proxy_url"`
+		ProxyPort string `yaml:"proxy_port"`
 		GraceStop bool   `yaml:"grace_stop"`
 	} `yaml:"server"`
 	Mysql struct {
@@ -36,6 +38,7 @@ type OriginConfig struct {
 		Domain  string `yaml:"domain"`   // 域名
 		MaxSize string `yaml:"max_size"` // 最大文件大小（字节）
 		Ipfs    string `yaml:"ipfs"`
+		BackUp  string `yaml:"backup"`
 	} `yaml:"upload"`
 	DefaultAdmin struct {
 		Username string `yaml:"username"`

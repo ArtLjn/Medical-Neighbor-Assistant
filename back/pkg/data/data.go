@@ -40,6 +40,7 @@ func InitApp() {
 	token.JwtKey = []byte(config.LoadConfig.AuthorizationFilter.JwtKey)
 }
 func NewDB() *gorm.DB {
+	// root:123456@tcp(192.168.1.106:33306)/oneapi?charset=%s&parseTime=True&loc=Local
 	dns := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
 		config.LoadConfig.Mysql.Username,
 		config.LoadConfig.Mysql.Password,

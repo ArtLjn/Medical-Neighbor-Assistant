@@ -14,6 +14,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8081
 EXPOSE 8082
 EXPOSE 8088
+EXPOSE 8099
 
 # 创建一个卷，用于共享config目录
 VOLUME ["/root/medhealth/back/config"]

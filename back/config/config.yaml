@@ -1,13 +1,15 @@
 server:
   host: 0.0.0.0
   port: 8088
+  proxy_url: http://localhost:8099/ipfs/
+  proxy_port: 8099
   grace_stop: false # 优雅停止
 
 mysql:
   username: root
   password: 123456
-  host: 192.168.1.106
-  port: 23306
+  host: localhost
+  port: 3306
   database: med_health
   charset: utf8mb4
 
@@ -15,9 +17,10 @@ mongo:
   url: "mongodb://myusername:mygptpassword@1192.168.1.106:27017/fastgpt?authSource=admin&directConnection=true"
 
 upload:
-  domain: http://192.168.1.106:8080/ipfs/ # ipfs网管
+  domain: http://10.211.55.14:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
-  ipfs: http://192.168.1.106:5001 # ipfs服务地址
+  ipfs: http://10.211.55.14:5001 # ipfs服务地址
+  backup: "/Users/ljn/Documents/blockchaincomplete/Internet+/back/asset/cid/"
 
 redis:
   addr: 192.168.1.106:26379

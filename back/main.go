@@ -66,6 +66,7 @@ func registerService(r *gin.Engine) {
 	for _, filter := range authFilterOptions.Filters {
 		r.Use(filter.Apply())
 	}
+	go util.RegisterProxy(config.LoadConfig.Server.ProxyPort)
 	publicGroup := r.Group("/api")
 	publicGroup.POST("/upload", ipfs.GinUploadImg)
 	server.InitDrugService(publicGroup)

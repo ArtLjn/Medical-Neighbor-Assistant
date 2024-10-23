@@ -34,8 +34,8 @@
       "fieldMap": {} // 字段映射（o1 模型需要把 max_tokens 映射为 max_completion_tokens）
     },
     {
-      "model": "gpt-4o-mini", // 模型名(对应OneAPI中渠道的模型名)
-      "name": "gpt-4o-mini", // 模型别名
+      "model": "glm-4", // 模型名(对应OneAPI中渠道的模型名)
+      "name": "glm4", // 模型别名
       "avatar": "/imgs/model/openai.svg", // 模型的logo
       "maxContext": 125000, // 最大上下文
       "maxResponse": 16000, // 最大回复
