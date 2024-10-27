@@ -191,7 +191,7 @@ func TestSystem(t *testing.T) {
 
 	// 调用封装的方法
 	mock.RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
-		drugDeliverCertificateList, patientList, physicianList, 10)
+		drugDeliverCertificateList, patientList, physicianList, 10, mock.FHospitalAgent())
 }
 
 func GenerateAppointTime() string {

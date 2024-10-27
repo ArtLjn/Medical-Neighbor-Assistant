@@ -134,7 +134,8 @@ var rng = rand.New(rand.NewSource(time.Now().UnixNano())) // 使用线程安全�
 
 // RunSystem 普通的系统模拟方法
 func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
-	drugDeliverCertificateList []string, patientList []model.Account, physicianList []model.Account, testNumber int) {
+	drugDeliverCertificateList []string, patientList []model.Account, physicianList []model.Account,
+	testNumber int) {
 	var mu sync.RWMutex
 	for i := 0; i < testNumber; i++ {
 		mu.RLock() // 读取锁
@@ -202,9 +203,9 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
 			log.Printf("药品派送失败: %v", err)
 		}
 
-		//if err = drug.HospitalAgentDrug(strconv.Itoa(int(drugRecord.ID))); err != nil {
-		//	log.Printf("医院代买确认失败: %v", err)
-		//}
+		if err = drug.HospitalAgentDrug(strconv.Itoa(int(drugRecord.ID))); err != nil {
+			log.Printf("医院代买确认失败: %v", err)
+		}
 	}
 	log.Println("模拟结束")
 }
