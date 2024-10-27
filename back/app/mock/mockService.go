@@ -202,9 +202,9 @@ func RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
 			log.Printf("药品派送失败: %v", err)
 		}
 
-		if err = drug.HospitalAgentDrug(strconv.Itoa(int(drugRecord.ID))); err != nil {
-			log.Printf("医院代买确认失败: %v", err)
-		}
+		//if err = drug.HospitalAgentDrug(strconv.Itoa(int(drugRecord.ID))); err != nil {
+		//	log.Printf("医院代买确认失败: %v", err)
+		//}
 	}
 	log.Println("模拟结束")
 }

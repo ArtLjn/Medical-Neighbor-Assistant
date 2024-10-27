@@ -93,7 +93,7 @@ func registerService(r *gin.Engine) {
 	// 初始化IPFS代理服务
 	go util.RegisterProxy(config.LoadConfig.Server.ProxyPort)
 
-	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.BasePath = "/"
 	// Swagger路由
 	// 使用适配器将 httpSwagger.WrapHandler 转换为 gin.HandlerFunc
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

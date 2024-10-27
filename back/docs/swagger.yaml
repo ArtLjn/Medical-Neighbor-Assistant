@@ -155,6 +155,10 @@ paths:
         in: query
         name: size
         type: integer
+      - description: 选项
+        in: query
+        name: raw
+        type: integer
       produces:
       - application/json
       responses:

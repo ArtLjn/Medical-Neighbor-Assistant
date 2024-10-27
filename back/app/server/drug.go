@@ -322,6 +322,7 @@ func QueryDrugByMedicalId(ctx *gin.Context) {
 // @Produce json
 // @Param page query int false "页码"  // 默认值为1
 // @Param size query int false "每页数量"  // 默认值为10
+// @Param raw  query int false "选项"  // 收货状态 (1: 已经收货, 2: 未收货)
 // @Success 200 {object} response.ResponseBuild "成功返回"
 // @Failure 400 {object} response.ResponseBuild "请求错误"
 // @Router /api/drug/queryAllDrug [get]
@@ -329,7 +330,8 @@ func QueryAllDrug(ctx *gin.Context) {
 	res := response.ResponseBuild{}
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
-	drugList, err := drug.QueryAllDrug(page, size)
+	raw, _ := strconv.Atoi(ctx.DefaultQuery("raw", "1"))
+	drugList, err := drug.QueryAllDrug(page, size, raw)
 	if err != nil {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return

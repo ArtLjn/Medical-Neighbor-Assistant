@@ -73,7 +73,8 @@ func QueryDrugAndAccountMessage(drugId string) map[string]interface{} {
 }
 
 // QueryAllDrug 查询所有药品
-func QueryAllDrug(page, size int) (map[string]interface{}, error) {
+// raw 1 已经审核, 2 未审核
+func QueryAllDrug(page, size, raw int) (map[string]interface{}, error) {
 	var (
 		drug    model.Drug
 		acc     model.Account
@@ -91,6 +92,13 @@ func QueryAllDrug(page, size int) (map[string]interface{}, error) {
 		Joins(fmt.Sprintf("JOIN %s as i ON m.bind_inquiry_id = i.id", inquiry.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as j ON j.uuid = i.patient", acc.TableName())).
 		Joins(fmt.Sprintf("JOIN %s as p ON p.uuid = i.physician", acc.TableName()))
+
+	switch raw {
+	case 1:
+		query = query.Where("d.is_receive = ?", true)
+	case 2:
+		query = query.Where("d.is_receive = ?", false)
+	}
 	return transferPage(query, page, size)
 }
 
@@ -215,8 +223,17 @@ func transferPage(query *gorm.DB, page, size int) (map[string]interface{}, error
 // HospitalAgentDrug 审核药品上链
 // param: drugId 药品id
 func HospitalAgentDrug(drugId string) error {
-	//TODO  审核药品上链
-	//TODO 更新数据库状态为已经收货
+	//审核药品上链
+	r, e := util.IsSuccessMsg(util.CommonEq("hospitalReviewDrugDelivery", []interface{}{drugId}))
+	if !r || e != nil {
+		log.Println("审核药品上链失败", e)
+		return e
+	}
+	//更新数据库状态为已经收货
+	if err := UpdateDrugRecord(map[string]interface{}{"id": drugId}, map[string]interface{}{"is_receive": true}); err != nil {
+		log.Println("更新收货状态失败", e)
+		return errors.New("更新收货状态失败")
+	}
 	return nil
 }
 

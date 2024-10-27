@@ -206,6 +206,12 @@ const docTemplate = `{
                         "description": "每页数量",
                         "name": "size",
                         "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "选项",
+                        "name": "raw",
+                        "in": "query"
                     }
                 ],
                 "responses": {

@@ -190,7 +190,8 @@ func TestSystem(t *testing.T) {
 	physicianList := user.QueryAllPhysician()
 
 	// 调用封装的方法
-	mock.RunSystem(inquiryDetails, inquiryVideoList, medicalImgList, drugDeliverCertificateList, patientList, physicianList, 20)
+	mock.RunSystem(inquiryDetails, inquiryVideoList, medicalImgList,
+		drugDeliverCertificateList, patientList, physicianList, 10)
 }
 
 func GenerateAppointTime() string {
