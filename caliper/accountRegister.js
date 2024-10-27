@@ -34,7 +34,7 @@ function generateWorkload() {
         // 编写交易字段
         let w = {
             'transaction_type': 'registerAccount(address,string,string)',
-            'accountAddress': "0x6f24bdb0bebc7fc7133092ee623d089963c01890",
+            'accountAddress': "0xa22ac65be61a6068d17037deecac0d1b221e4e52",
             'role': "患者",
             'uuid': '123456',
         };
@@ -53,3 +53,4 @@ module.exports.end = function () {
     // Do nothing
     return Promise.resolve();
 };
+

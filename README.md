@@ -17,7 +17,7 @@
 
 | 子项目名 | 项目路径                                               |
 |------|----------------------------------------------------|
-| 后端服务 | [/medHealth/back](./back/docs/医邻助手.md)             |
+| 后端服务 | [/medHealth/back](back/dd/医邻助手.md)             |
 | 智能合约 | [/medHealth/truffle/contract](./truffle/contracts) |
 
 

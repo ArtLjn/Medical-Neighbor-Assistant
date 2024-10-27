@@ -37,6 +37,15 @@ func InitInquiryService(group *gin.RouterGroup) {
 }
 
 // CreateInquiryRecord 创建问诊记录
+// @Summary 创建问诊记录
+// @Description 创建一个新的问诊记录
+// @Tags Inquiry
+// @Accept json
+// @Produce json
+// @Param inquiryRecord body bo.CreateInquiryBo true "问诊记录信息" // 这里假设你有一个 bo.CreateInquiryBo 结构体
+// @Success 200 {object} response.ResponseBuild "成功返回"
+// @Failure 400 {object} response.ResponseBuild "请求错误"
+// @Router /api/inquiry/createInquiryRecord [post]
 func CreateInquiryRecord(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	var inquiryRecord bo.CreateInquiryBo
@@ -64,7 +73,17 @@ func CreateInquiryRecord(ctx *gin.Context) {
 }
 
 // QueryAllInquiryRecord 查询所有问诊记录: 管理员使用
-// @param isInquiry 1: 已经问诊结束 2: 未问诊 3: 未指派医师 4: 代接诊 5: 问诊结束未审核的记录
+// @Summary 查询所有问诊记录
+// @Description 管理员可以查询所有问诊记录，并可以通过状态过滤记录
+// @Tags Inquiry
+// @Accept json
+// @Produce json
+// @Param isInquiry query int false "问诊状态 (1: 已经问诊结束, 2: 未问诊, 3: 未指派医师, 4: 代接诊, 5: 问诊结束未审核的记录)"
+// @Param page query int false "页码 (默认为1)"
+// @Param size query int false "每页记录数 (默认为10)"
+// @Success 200 {object} response.ResponseBuild "成功返回"
+// @Failure 400 {object} response.ResponseBuild "请求错误"
+// @Router /api/inquiry/queryAllInquiryRecord [get]
 func QueryAllInquiryRecord(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
 	isInquiry, _ := strconv.Atoi(ctx.DefaultQuery("isInquiry", "0"))

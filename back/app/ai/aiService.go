@@ -22,7 +22,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// Mongo聊天记录结构体
+// Res 聊天记录结构体
 type Res struct {
 	ChatId string        `json:"chatId"`
 	Obj    string        `json:"obj"`

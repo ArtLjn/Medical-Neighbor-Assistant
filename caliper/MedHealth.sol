@@ -44,7 +44,7 @@ contract MedHealth {
     mapping(uint => DrugDelivery) drugDeliveryMapping;
     
     function registerAccount(address accountAddress, string role, string uuid) public {
-//        require(accountMapping[accountAddress].accountAddress == 0x0, "账户已注册");
+       require(accountMapping[accountAddress].accountAddress == 0x0, "账户已注册");
         accountMapping[accountAddress] = Account(accountAddress, role, uuid);
     }
     

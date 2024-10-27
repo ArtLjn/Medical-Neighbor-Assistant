@@ -18,14 +18,18 @@ import (
 	"back/pkg/util"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"log"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
+// QueryUser 查询用户
+// params: cond 查询条件
+// return: model.Account
 func QueryUser(cond map[string]interface{}) model.Account {
 	query := data.Db.Model(&model.Account{})
 	for k, v := range cond {
@@ -36,12 +40,16 @@ func QueryUser(cond map[string]interface{}) model.Account {
 	return account
 }
 
+// QueryAllPatient 查询所有用户
+// return: []model.Account
 func QueryAllPatient() []model.Account {
 	var accounts []model.Account
 	data.Db.Where("role = ?", role.Patient).Find(&accounts)
 	return accounts
 }
 
+// QueryPage 查询分页
+// params: page 页码, size 每页大小, role 角色
 func QueryPage(page, size int, role string) map[string]interface{} {
 	query := data.Db.Model(model.Account{}).Where("role = ?", role)
 	return transferPage(query, page, size)
@@ -80,17 +88,19 @@ func QueryAllPhysician() []model.Account {
 	return accounts
 }
 
+// WriteAccountsToDB 读取excel写入数据库
 func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 	var (
 		accounts []model.Account
 		mx       sync.Mutex
 	)
-
+	// 循环读取excel上传信息
 	for i, v := range receiver {
+		// 跳过表头
 		if i == 0 {
 			continue
 		}
-
+		// 创建Account字段
 		account := model.Account{
 			Username:   v[0],
 			Sex:        v[1],
@@ -101,6 +111,7 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 			CreateTime: time.Now().Format("2006-01-02 15:04:05"),
 		}
 
+		// 判断是否是医生
 		if isPhysician {
 			// 处理医生特有的字段
 			account.Hospital = v[3]
@@ -110,7 +121,7 @@ func WriteAccountsToDB(receiver [][]string, roleType string, isPhysician bool) {
 			age, _ := strconv.Atoi(v[4]) // 转换年龄
 			account.Age = age
 		}
-
+		// 加信息加入账户列表
 		accounts = append(accounts, account)
 	}
 

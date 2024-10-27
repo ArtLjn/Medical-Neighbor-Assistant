@@ -10,6 +10,7 @@ package main
 import (
 	"back/app/server"
 	"back/config"
+	"back/docs"
 	"back/pkg/auth"
 	"back/pkg/custom_log"
 	"back/pkg/data"
@@ -18,17 +19,37 @@ import (
 	"back/pkg/util"
 	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
 )
 
+// @title           Swagger MedHealth
+// @version         1.0
+// @description     This is a sample server celler server.
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8088
+// @BasePath  /api
+
+// @securityDefinitions.basic  BasicAuth
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	Execute()
 	data.InitApp()
@@ -61,22 +82,36 @@ func main() {
 	}
 }
 
+// registerService 注册服务,包括认证、用户、药品、问诊、医疗记录、汇总等
 func registerService(r *gin.Engine) {
+	// 初始化认证服务,包括JWT
 	authFilterOptions := auth.NewFilterOptions(auth.WithAuthorizationFilter())
+	// 循环注册过滤器
 	for _, filter := range authFilterOptions.Filters {
 		r.Use(filter.Apply())
 	}
+	// 初始化IPFS代理服务
 	go util.RegisterProxy(config.LoadConfig.Server.ProxyPort)
+
+	docs.SwaggerInfo.BasePath = "/api"
+	// Swagger路由
+	// 使用适配器将 httpSwagger.WrapHandler 转换为 gin.HandlerFunc
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	// 定义公共路由组
 	publicGroup := r.Group("/api")
+	// 定义上传接口
 	publicGroup.POST("/upload", ipfs.GinUploadImg)
+	// 初始化药品、问诊、医疗记录、用户、汇总服务
 	server.InitDrugService(publicGroup)
 	server.InitInquiryService(publicGroup)
 	server.InitMedicalService(publicGroup)
 	server.InitUserService(publicGroup)
 	server.InitSumService(publicGroup)
+	// 初始化Mock数据
 	if config.LoadConfig.Mock.Open {
 		server.InitMockData(publicGroup)
 	}
+	// 初始化AI服务
 	if config.LoadConfig.AI.OpenAiServer {
 		data.Cli = data.NewMongo()
 		data.FastGptChatItems = data.NewFastGptChatItems()

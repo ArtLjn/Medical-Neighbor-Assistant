@@ -71,24 +71,8 @@ services:
     image: 'aoyanfei/redis-admin'
     ports:
       - '9898:9898'
-  ipfs:
-    # ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://36.50.226.26:5001", "http://localhost:3000", "http://127.0.0.1:5001", "https://webui.ipfs.io"]'
-    # ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "POST"]'
-    image: ipfs/go-ipfs:latest
-    container_name: ipfs_node
-    restart: always
-    ports:
-      - "4001:4001"
-      - "5008:5001"
-      - "8080:8080"
-    environment:
-      API_ALLOW_METHOD: '["PUT","POST"]'
-      API_ALLOW_ORIGIN: '["*"]'
-    volumes:
-      - ipfs_data:/data/ipfs
-volumes:
-  ipfs_data:
 
 networks:
   my-network:
     driver: bridge
+

@@ -18,9 +18,15 @@ import (
 	"time"
 )
 
+// CreateMedical 创建病历,并返回病历id
+// receiver: 病历信息
+// account: 操作者账号
+// medicalIds: 返回病历id
 func CreateMedical(receiver bo.MedicalUploadBo, account string) (uint, error) {
-	var medical model.Medical
+	var medical model.Medical //病历
+	// 拷贝属性
 	util.BeanUtil.CopyProperties(receiver, &medical)
+	// 将病历更新到区块链中,并返回结果
 	r, e := util.IsSuccessMsg(util.CommonEqByUser(account, "physicianDiagnosisInquiry", []interface{}{
 		receiver.BindInquiryID,
 		receiver.MedicalImg,
@@ -29,6 +35,7 @@ func CreateMedical(receiver bo.MedicalUploadBo, account string) (uint, error) {
 	if !r && e != nil {
 		return 0, e
 	}
+	// 写入数据库
 	err := data.Db.Create(&medical).Error
 	if err != nil {
 		return 0, fmt.Errorf("create medical error: %v", err)

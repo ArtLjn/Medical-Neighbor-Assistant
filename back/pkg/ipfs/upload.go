@@ -6,13 +6,14 @@ import (
 	"back/pkg/response"
 	"back/pkg/util"
 	"fmt"
-	"github.com/mr-tron/base58"
 	"io"
 	"math/rand"
 	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/mr-tron/base58"
 
 	"github.com/gin-gonic/gin"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -81,12 +82,11 @@ func uploadToIPFS(file *multipart.FileHeader) (string, error) {
 
 	return cid, nil
 }
-
-// uploadToIPFSBackUp 直接将文件流上传并固定到 IPFS，同时在本地保存一个副本
 func uploadToIPFSBackUp(file *multipart.FileHeader) (string, error) {
 	// 创建一个 IPFS 客户端
 	u := config.LoadConfig.UploadRepo
 	var pseudoCID string
+
 	// 尝试上传到 IPFS
 	cid, err := uploadToIPFS(file)
 	if err != nil {
@@ -105,6 +105,13 @@ func uploadToIPFSBackUp(file *multipart.FileHeader) (string, error) {
 
 	// 在本地保存一个以 cid 为名称的副本
 	localPath := filepath.Join(u.BackUp, pseudoCID) // 设定保存路径
+
+	// 检查目录是否存在，如果不存在则创建
+	dir := filepath.Dir(localPath)
+	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+		return "", fmt.Errorf("创建目录失败: %v", err)
+	}
+
 	dstFile, err := os.Create(localPath)
 	if err != nil {
 		return "", fmt.Errorf("创建本地副本失败: %v", err)

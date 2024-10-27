@@ -1,0 +1,371 @@
+basePath: /api
+definitions:
+  bo.CreateInquiryBo:
+    properties:
+      appointment_time:
+        type: string
+      inquiry_detail:
+        type: string
+      patient:
+        type: string
+      reserved_phone:
+        type: string
+      type:
+        type: string
+    required:
+    - appointment_time
+    - inquiry_detail
+    - reserved_phone
+    - type
+    type: object
+  response.ResponseBuild:
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: localhost:8088
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger MedHealth
+  version: "1.0"
+paths:
+  /api/drug/hospitalAgentDrugConfirmReceipt:
+    post:
+      consumes:
+      - application/json
+      description: 医院管理人员审核药品的代买情况，通过订单ID确认接收状态
+      parameters:
+      - description: 订单ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 未找到该订单
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 审核药品代买情况
+      tags:
+      - Drug
+  /api/drug/physiciansOrderAgentDrug:
+    post:
+      consumes:
+      - application/json
+      description: 医师通过该接口进行药品的代买操作
+      parameters:
+      - description: 药品ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 药品未找到
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 医师代买药品
+      tags:
+      - Drug
+  /api/drug/physiciansOrderDelivery:
+    post:
+      consumes:
+      - application/json
+      description: 医师通过该接口进行药品的接单和派送操作
+      parameters:
+      - description: 药品ID
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: 派送证书
+        in: query
+        name: certificate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 药品未找到
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 医师派送药品
+      tags:
+      - Drug
+  /api/drug/queryAllDrug:
+    get:
+      consumes:
+      - application/json
+      description: 分页查询药品信息列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 查询所有药品信息
+      tags:
+      - Drug
+  /api/drug/queryDrugByID:
+    get:
+      consumes:
+      - application/json
+      description: 根据药品ID查询相应的药品信息
+      parameters:
+      - description: 药品ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 药品未找到
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 查询药品信息
+      tags:
+      - Drug
+  /api/drug/queryDrugByMedicalId:
+    get:
+      consumes:
+      - application/json
+      description: 根据病历ID查询相关的药品、患者、医生和病历信息
+      parameters:
+      - description: 病历ID
+        in: query
+        name: medical_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 未找到相关药品
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 根据病历ID查询药品信息
+      tags:
+      - Drug
+  /api/drug/queryPatientAgentDrugHistory:
+    get:
+      consumes:
+      - application/json
+      description: 患者可以通过该接口查询自己的药品代买历史记录，支持分页
+      parameters:
+      - description: 是否查询原始记录
+        in: query
+        name: raw
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 未找到记录
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 查询患者药品代买历史记录
+      tags:
+      - Drug
+  /api/drug/queryPhysiciansAgentHistoryRecord:
+    get:
+      consumes:
+      - application/json
+      description: 医师可以通过该接口查询自己代卖的药品历史记录，支持分页
+      parameters:
+      - description: 是否查询原始记录
+        in: query
+        name: raw
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "404":
+          description: 未找到记录
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "500":
+          description: 系统错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 查询医师代卖药品历史记录
+      tags:
+      - Drug
+  /api/inquiry/createInquiryRecord:
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的问诊记录
+      parameters:
+      - description: 问诊记录信息
+        in: body
+        name: inquiryRecord
+        required: true
+        schema:
+          $ref: '#/definitions/bo.CreateInquiryBo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 创建问诊记录
+      tags:
+      - Inquiry
+  /api/inquiry/queryAllInquiryRecord:
+    get:
+      consumes:
+      - application/json
+      description: 管理员可以查询所有问诊记录，并可以通过状态过滤记录
+      parameters:
+      - description: '问诊状态 (1: 已经问诊结束, 2: 未问诊, 3: 未指派医师, 4: 代接诊, 5: 问诊结束未审核的记录)'
+        in: query
+        name: isInquiry
+        type: integer
+      - description: 页码 (默认为1)
+        in: query
+        name: page
+        type: integer
+      - description: 每页记录数 (默认为10)
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功返回
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+        "400":
+          description: 请求错误
+          schema:
+            $ref: '#/definitions/response.ResponseBuild'
+      summary: 查询所有问诊记录
+      tags:
+      - Inquiry
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

@@ -1,6 +1,8 @@
 server:
   host: 0.0.0.0
   port: 8088
+  proxy_url: http://110.42.244.244:8099/ipfs/
+  proxy_port: 8099
   grace_stop: true # 优雅停止
 
 mysql:
@@ -18,6 +20,7 @@ upload:
   domain: http://110.42.244.244:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
   ipfs: http://110.42.244.244:5001 # ipfs服务地址
+  backup: "./asset/cid/"
 
 redis:
   addr: 110.42.244.244:26379

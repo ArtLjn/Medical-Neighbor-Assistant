@@ -34,7 +34,7 @@ func fileHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RegisterProxy(port string) {
-	http.HandleFunc("/", fileHandler)
+	// http.HandleFunc("/", fileHandler)
 	http.HandleFunc("/ipfs/", fileHandler) // 处理 /ipfs/ 路径
 	fmt.Println("IPFS proxy server started on port", port)
 	if err := http.ListenAndServe(":"+port, nil); err != nil {

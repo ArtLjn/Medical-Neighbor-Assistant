@@ -238,10 +238,14 @@ func LogOut(ctx *gin.Context) {
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").Build(ctx)
 }
 
+// LikeAccountByCV 分页匹配查询用户
 func LikeAccountByCV(ctx *gin.Context) {
 	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
+	// 获取查询条件,查询值
 	cond, val := ctx.DefaultQuery("cond", "username"), ctx.DefaultQuery("val", "123")
+	// 获取分页页码数
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	// 获取分页数量
 	size, _ := strconv.Atoi(ctx.DefaultQuery("size", "10"))
 	re := ctx.DefaultQuery("role", role.Patient)
 	res.SetCode(custom_error.SuccessCode).

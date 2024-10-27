@@ -14,12 +14,12 @@ mysql:
   charset: utf8mb4
 
 mongo:
-  url: "mongodb://myusername:mygptpassword@1192.168.1.106:27017/fastgpt?authSource=admin&directConnection=true"
+  url: "mongodb://myusername:mygptpassword@192.168.1.106:27017/fastgpt?authSource=admin&directConnection=true"
 
 upload:
   domain: http://192.168.1.106:8080/ipfs/ # ipfs网管
   max_size: 2GB # 最大上传内存
-  ipfs: http://192.168.1.106:5001 # ipfs服务地址
+  ipfs: http://192.168.1.106:5008 # ipfs服务地址
   backup: "./asset/cid/"
 
 redis:
@@ -30,10 +30,10 @@ redis:
 # 合约配置文件
 contract:
   contract_name: MedHealth
-  contract_address: 0x2d81d8a597927967435357ff269d7b97234dfde2
+  contract_address: 0x8b43e4e197b017cc8f98b4fc63bfd2c3cbdf544f
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
-  owner: 0x169185fb3aca2aa1967f33c6fc4f745acfbea436
-  server_host: "http://localhost:5002"
+  owner: 0xa22ac65be61a6068d17037deecac0d1b221e4e52
+  server_host: "http://192.168.1.106:5002"
   trans_url: "/WeBASE-Front/trans/handle"
   parse_url: "/WeBASE-Front/tool/decode"
   account_url: "/WeBASE-Front/privateKey?type=0&userName="
@@ -63,7 +63,7 @@ ai: # AI
   #是否开启聊天记录mongo监听
   watch_mongo_chat: true
   # AI服务总开关
-  open_ai_server: false
+  open_ai_server: true
 
 mock: # Mock模拟数据生成服务
   open: true # 是否开启服务

@@ -27,7 +27,7 @@ module.exports.init = function (blockchain, context, args) {
 
 // 查询账户信息
 module.exports.run = function () {
-    return bc.queryState(contx, 'MedHealth', 'v0', '0x6f24bdb0bebc7fc7133092ee623d089963c01890', 'getAccount(address)');
+    return bc.queryState(contx, 'MedHealth', 'v0', '0xa22ac65be61a6068d17037deecac0d1b221e4e52', 'getAccount(address)');
 };
 
 module.exports.end = function () {
