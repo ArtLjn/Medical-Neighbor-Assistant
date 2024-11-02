@@ -1,0 +1,77 @@
+html {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+#app {
+  height: 100%;
+  max-width: inherit;
+  padding: 0;
+}
+
+body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+
+@font-face {
+  font-family: '阿里妈妈数黑体 Bold';
+  font-weight: 700;
+  src:
+    url('//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/0tbHal8zu3Tv.woff2')
+      format('woff2'),
+    url('//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/NdKJTmW3ZeyC.woff')
+      format('woff');
+  font-display: swap;
+}
+
+/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
+@font-face {
+  font-family: "阿里妈妈方圆体 VF Regular";src: url("//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/VGmYwqJCpztT.woff2") format("woff2"),
+  url("//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/ERiKEIs0iL8W.woff") format("woff");
+  font-display: swap;
+}
+
+/* 在线链接服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
+@font-face {
+  font-family: "阿里巴巴普惠体 2.0 35 Thin";font-weight: 250;src: url("//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/SWlglKhHt5cH.woff2") format("woff2"),
+  url("//at.alicdn.com/wf/webfont/lfy2Akxmzkxy/XUCSYH2LxmRH.woff") format("woff");
+  font-display: swap;
+}
+
+/*全局滚动条样式*/
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(40,44,52,.1);
+  border: 3px solid transparent;
+  border-radius: 7px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(40,44,52,.2)
+}
+
+/* fade-slide */
+.fade-slide-leave-active,
+.fade-slide-enter-active {
+  transition: all 1.0s;
+}
+
+.fade-slide-enter-from {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+
+.fade-slide-leave-to {
+  transform: translateX(50px);
+  opacity: 0;
+}

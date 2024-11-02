@@ -1,0 +1,177 @@
+{
+	"easycom": {
+			"^u-(.*)": "uview-ui/components/u-$1/u-$1.vue"
+		},
+	"pages": [{
+			"path": "pages/init/init",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path": "pages/guide/guide",
+			"style": {
+				"navigationBarTitleText": "引导页",
+				"titleNView": false
+			}
+		},
+		{
+			"path": "pages/login",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		}, {
+			"path": "pages/register",
+			"style": {
+				"navigationBarTitleText": "注册"
+			}
+		}, {
+			"path": "pages/index",
+			"style": {
+				"navigationBarTitleText": "首页",
+				"navigationStyle": "custom"
+			}
+		}, {
+			"path": "pages/work/index",
+			"style": {
+				"navigationBarTitleText": "工作台"
+			}
+		}, {
+			"path": "pages/mine/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"titleNView": false
+			}
+		}, {
+			"path": "pages/mine/avatar/index",
+			"style": {
+				"navigationBarTitleText": "修改头像"
+			}
+		}, {
+			"path": "pages/mine/info/index",
+			"style": {
+				"navigationBarTitleText": "个人信息"
+			}
+		}, {
+			"path": "pages/mine/info/edit",
+			"style": {
+				"navigationBarTitleText": "编辑资料"
+			}
+		}, {
+			"path": "pages/mine/pwd/index",
+			"style": {
+				"navigationBarTitleText": "修改密码"
+			}
+		}, {
+			"path": "pages/mine/setting/index",
+			"style": {
+				"navigationBarTitleText": "应用设置"
+			}
+		}, {
+			"path": "pages/mine/help/index",
+			"style": {
+				"navigationBarTitleText": "常见问题"
+			}
+		}, {
+			"path": "pages/mine/about/index",
+			"style": {
+				"navigationBarTitleText": "关于我们"
+			}
+		}, {
+			"path": "pages/common/webview/index",
+			"style": {
+				"navigationBarTitleText": "浏览网页"
+			}
+		}, {
+			"path": "pages/common/textview/index",
+			"style": {
+				"navigationBarTitleText": "浏览文本"
+			}
+		},
+		{
+			"path": "pages/userInfo/userInfo",
+			"style": {
+				"navigationBarTitleText": "个人信息",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/registration/registration",
+			"style" : 
+			{
+				"navigationBarTitleText" : "登记页",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/shop/shop",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/receive/receive",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/visit/visit",
+			"style" : 
+			{
+				"navigationBarTitleText" : "医师就诊登记",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/record/record",
+			"style" : 
+			{
+				"navigationBarTitleText" : "患者问诊记录",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/shopReceive/shopReceive",
+			"style" : 
+			{
+				"navigationBarTitleText" : "",
+				"titleNView": false
+			}
+		},
+		{
+			"path" : "pages/mine/middleWare"
+		}
+	],
+	"tabBar": {
+		"color": "#000000",
+		"selectedColor": "#84C99A",
+		"borderStyle": "white",
+		"backgroundColor": "#ffffff",
+		"list": [{
+			"pagePath": "pages/index",
+			"iconPath": "static/images/tabbar/home_light.png",
+			"selectedIconPath": "static/images/tabbar/home_filled.png",
+			"text": "首页"
+		}, {
+			"pagePath": "pages/shop/shop",
+			"iconPath": "static/images/tabbar/cart-add.png",
+			"selectedIconPath": "static/images/tabbar/cart-add-fill.png",
+			"text": "药品代买"
+		}, {
+			"pagePath": "pages/mine/index",
+			"iconPath": "static/images/tabbar/ai chat.png",
+			"selectedIconPath": "static/images/tabbar/AI-chat.png",
+			"text": "AI问诊"
+		}]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "RuoYi",
+		"navigationBarBackgroundColor": "#FFFFFF"
+	}
+}

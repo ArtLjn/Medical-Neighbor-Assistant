@@ -1,0 +1,72 @@
+{
+  "id": "4702280",
+  "name": "medial-admin",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "26847669",
+      "name": "医院",
+      "font_class": "yiyuan",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "10064725",
+      "name": "视频",
+      "font_class": "shipin",
+      "unicode": "e631",
+      "unicode_decimal": 58929
+    },
+    {
+      "icon_id": "5434073",
+      "name": "患者管理",
+      "font_class": "huanzheguanli",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "26523851",
+      "name": "医师",
+      "font_class": "yishi",
+      "unicode": "e7c0",
+      "unicode_decimal": 59328
+    },
+    {
+      "icon_id": "629343",
+      "name": "首页",
+      "font_class": "shouye",
+      "unicode": "e64f",
+      "unicode_decimal": 58959
+    },
+    {
+      "icon_id": "3315087",
+      "name": "病例",
+      "font_class": "bingli",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "6255765",
+      "name": "用户信息",
+      "font_class": "yonghuxinxi",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "10882871",
+      "name": "问诊记录",
+      "font_class": "wenzhenjilu",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "28472538",
+      "name": "带药",
+      "font_class": "daiyao",
+      "unicode": "e755",
+      "unicode_decimal": 59221
+    }
+  ]
+}

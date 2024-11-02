@@ -1,0 +1,1 @@
+import{cu as o,r as n}from"./index-BqR9c6V8.js";const T=o("tab",()=>{const e=n([]),a=n("");return{openTabs:e,currentTab:a,add_tab:t=>{e.value.push(t)},delete_tab:t=>{const r=e.value.findIndex(s=>s.route===t);return e.value.splice(r,1),r},setCurrentTab:t=>{a.value=t},clearTab:()=>{e.value=[]}}});export{T as u};
