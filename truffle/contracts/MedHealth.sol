@@ -30,9 +30,9 @@ contract MedHealth {
         address patientAddress; //登记患者地址
         address physicianAddress; //登记医师地址
         address supervisorAddress; //登记监管人员地址
-        string certiHash; //派送凭证ipfs保存cid
+        string certIHash; //派送凭证ipfs保存cid
         uint8 isAccept; //是否接单
-        uint8 isdelivery; //否否派送
+        uint8 isDelivery; //否否派送
         uint8 isReview; //是否审核
     }
     address owner;
@@ -129,12 +129,12 @@ contract MedHealth {
     }
 
     //医师派送订单
-    function physicianDeliveryDrug(uint id, string certiHash) public {
+    function physicianDeliveryDrug(uint id, string certIHash) public {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
         require(keccak256(abi.encodePacked(accountMapping[msg.sender].role)) == keccak256(abi.encodePacked("医师")), "此操作(登记药品代买)只能患者使用");
         DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
-        drugDelivery.certiHash = certiHash;
-        drugDelivery.isdelivery = 1;
+        drugDelivery.certIHash = certIHash;
+        drugDelivery.isDelivery = 1;
     }
 
     //医院审核药品代买情况
@@ -149,6 +149,6 @@ contract MedHealth {
     function getDrugDelivery(uint id) public view returns(uint, uint, address, address, address, string, uint8, uint8, uint8) {
         require(drugDeliveryMapping[id].id != 0, "药品代买信息不存在");
         DrugDelivery storage drugDelivery = drugDeliveryMapping[id];
-        return (drugDelivery.id, drugDelivery.bindInquiryId, drugDelivery.patientAddress, drugDelivery.physicianAddress, drugDelivery.supervisorAddress,drugDelivery.certiHash, drugDelivery.isAccept, drugDelivery.isdelivery, drugDelivery.isReview);
+        return (drugDelivery.id, drugDelivery.bindInquiryId, drugDelivery.patientAddress, drugDelivery.physicianAddress, drugDelivery.supervisorAddress,drugDelivery.certIHash, drugDelivery.isAccept, drugDelivery.isDelivery, drugDelivery.isReview);
     }
 }

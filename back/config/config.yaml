@@ -33,10 +33,10 @@ redis:
 # 合约配置文件
 contract:
   contract_name: MedHealth # 合约名称
-  contract_address: 0x8b43e4e197b017cc8f98b4fc63bfd2c3cbdf544f # 合约地址
+  contract_address: 0x31a912504381684221a5681a203489f5211b5ec8 # 合约地址
   # 合约ABI
   contract_abi: '[{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianAcceptDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"accountAddress","type":"address"},{"name":"role","type":"string"},{"name":"uuid","type":"string"}],"name":"registerAccount","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getDrugDelivery","outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"physicianRecInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"hospitalReviewDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryType","type":"string"}],"name":"patientRegistrationInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getInquiry","outputs":[{"name":"","type":"uint256"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"},{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"inquiryId","type":"uint256"}],"name":"patientRegDrugDelivery","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"physicianAddress","type":"address"}],"name":"hospitalDisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"medicalHash","type":"string"},{"name":"videoHash","type":"string"}],"name":"physicianDiagnosisInquiry","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"certiHash","type":"string"}],"name":"physicianDeliveryDrug","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"accountAddress","type":"address"}],"name":"getAccount","outputs":[{"name":"","type":"address"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]'
-  owner: 0xa22ac65be61a6068d17037deecac0d1b221e4e52 # 合约部署者地址
+  owner: 0xf0efad94efbe3a9fed53080dd9112295b0dde58a # 合约部署者地址
   server_host: "http://192.168.1.106:5002"
   trans_url: "/WeBASE-Front/trans/handle" # 区块链交易接口
   parse_url: "/WeBASE-Front/tool/decode" # 区块链解析接口
@@ -82,7 +82,7 @@ mock: # Mock模拟数据生成服务
     # 随机药物派送凭证
     drug_deliver_certificate: "drugDeliverCertificate.txt"
 
-authorizationFilter:  # 权限认证路径管理
+authorization Filter:  # 权限认证路径管理
   jwt_key: "med_health_key_@key"
   need_authorization_api_list: #需要权限认证的接口
     - /api/user/queryUserMessage

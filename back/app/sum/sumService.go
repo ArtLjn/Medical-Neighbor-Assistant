@@ -12,6 +12,8 @@ import (
 	"back/pkg/data/model"
 	"fmt"
 	"log"
+	"sort"
+	"time"
 )
 
 type InquiryDayType struct {
@@ -48,17 +50,25 @@ func InquiryTypeDay(day string) map[string]interface{} {
 		}
 
 		// 根据 type 统计数量
-		if _, typeExists := sumMap[date][inquiry.Type]; typeExists {
-			sumMap[date][inquiry.Type]++
-		} else {
-			sumMap[date][inquiry.Type] = 1
-		}
+		sumMap[date][inquiry.Type]++
 	}
 
-	for k, v := range sumMap {
+	// 获取日期列表并按日期排序
+	for k := range sumMap {
 		dayList = append(dayList, k)
-		homeList = append(homeList, v[data.FamilyMedicalTreatment])
-		communityList = append(communityList, v[data.CommunityMedicalTreatment])
+	}
+
+	sort.Slice(dayList, func(i, j int) bool {
+		// 将字符串日期转换为时间类型进行比较
+		dateI, _ := time.Parse("2006-01-02", dayList[i])
+		dateJ, _ := time.Parse("2006-01-02", dayList[j])
+		return dateI.Before(dateJ)
+	})
+
+	// 填充 homeList 和 communityList
+	for _, date := range dayList {
+		homeList = append(homeList, sumMap[date][data.FamilyMedicalTreatment])
+		communityList = append(communityList, sumMap[date][data.CommunityMedicalTreatment])
 	}
 
 	// 转换 sumMap 为 []map[string]interface{} 格式
@@ -69,11 +79,11 @@ func InquiryTypeDay(day string) map[string]interface{} {
 	}
 	return result
 }
-
 func DrugEveryDayNumber(day string) map[string]interface{} {
 	var (
 		drugList []model.Drug
 	)
+
 	err := data.Db.Model(model.Drug{}).Select("create_time").
 		Where("STR_TO_DATE(create_time, '%Y-%m-%d %H:%i:%s') >= DATE_SUB(NOW(), " + fmt.Sprintf("INTERVAL %s DAY)", day)).
 		Order("create_time desc").Find(&drugList).Error
@@ -84,23 +94,35 @@ func DrugEveryDayNumber(day string) map[string]interface{} {
 
 	// 初始化 sumMap 来存储每天的统计结果
 	sumMap := make(map[string]int)
-	var (
-		dayList   []string
-		countList []int
-	)
+
 	// 遍历 drugList，按日期统计
 	for _, d := range drugList {
 		// 提取日期部分（例如 "2024-10-12"）
 		date := d.CreateTime[:10]
-
 		// 累计该日期的数量
 		sumMap[date]++
 	}
 
-	for date, count := range sumMap {
+	// 创建一个切片来存储排序后的日期
+	var dayList []string
+	for date := range sumMap {
 		dayList = append(dayList, date)
-		countList = append(countList, count)
 	}
+
+	// 对日期进行排序
+	sort.Slice(dayList, func(i, j int) bool {
+		// 将字符串日期转换为时间类型进行比较
+		dateI, _ := time.Parse("2006-01-02", dayList[i])
+		dateJ, _ := time.Parse("2006-01-02", dayList[j])
+		return dateI.Before(dateJ)
+	})
+
+	// 创建计数列表
+	var countList []int
+	for _, date := range dayList {
+		countList = append(countList, sumMap[date])
+	}
+
 	result := map[string]interface{}{
 		"dayList": dayList,
 		"count":   countList,

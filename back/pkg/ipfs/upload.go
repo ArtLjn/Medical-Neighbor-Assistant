@@ -83,7 +83,6 @@ func uploadToIPFS(file *multipart.FileHeader) (string, error) {
 	return cid, nil
 }
 func uploadToIPFSBackUp(file *multipart.FileHeader) (string, error) {
-	// 创建一个 IPFS 客户端
 	u := config.LoadConfig.UploadRepo
 	var pseudoCID string
 

@@ -355,7 +355,7 @@ func TransferToInquiryVo(receiver model.Inquiry) vo.QueryInquiryVo {
 	return inquiryVo
 }
 
-// QueryInquiryByCond 查询问诊记录
+// QueryLikeByCond 查询问诊记录
 // params: username: 用户名
 // isPatient: 是否是患者
 // page: 页码

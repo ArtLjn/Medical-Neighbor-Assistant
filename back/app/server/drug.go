@@ -143,26 +143,38 @@ func QueryPhysiciansAgentHistoryRecord(ctx *gin.Context) {
 // @Failure 500 {object} response.ResponseBuild "系统错误"
 // @Router /api/drug/hospitalAgentDrugConfirmReceipt [post]
 func HospitalAgentDrugConfirmReceipt(ctx *gin.Context) {
-	res := response.NewResponseBuild() // 每次请求创建新的 ResponseBuild 实例
-	// 获取订单id
+	res := response.NewResponseBuild()
+
+	// 获取订单 ID 并进行校验
 	id := ctx.Query("id")
 	if id == "" {
 		res.SetCode(custom_error.ClientErrorCode).SetMsg(custom_error.ClientError).Build(ctx)
 		return
 	}
-	// 判断订单是否存在
-	drugRecord := drug.QueryDrugRecord(map[string]interface{}{
-		"id": id,
-	})
-	if drugRecord != (model.Drug{}) && drugRecord.IsReceive {
-		res.SetCode(custom_error.ClientErrorCode).SetMsg("Already receive").Build(ctx)
+
+	// 查询订单记录并进行校验
+	drugRecord := drug.QueryDrugRecord(map[string]interface{}{"id": id})
+	switch {
+	// 判断是否查询为空
+	case drugRecord == (model.Drug{}):
+		res.SetCode(custom_error.NotFoundCode).SetMsg(custom_error.NotFound).Build(ctx)
+		return
+	// 判断是否已经接收
+	case drugRecord.IsReceive:
+		res.SetCode(custom_error.ClientErrorCode).SetMsg("Already received").Build(ctx)
+		return
+	// 判断是否已经派送
+	case len(drugRecord.DeliveryCertificate) == 0:
+		res.SetCode(custom_error.ClientErrorCode).SetMsg("该记录未被派送").Build(ctx)
 		return
 	}
-	// 进行药品代买
+
+	// 进行药品代买操作
 	if err := drug.HospitalAgentDrug(id); err != nil {
 		res.SetCode(custom_error.SystemErrorCode).SetMsg(err.Error()).Build(ctx)
 		return
 	}
+
 	res.SetCode(custom_error.SuccessCode).SetMsg("success").SetData(nil).Build(ctx)
 }
 

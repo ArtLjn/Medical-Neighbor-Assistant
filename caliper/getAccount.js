@@ -14,7 +14,7 @@
 
 'use strict';
 
-module.exports.info = 'get numid energy';
+module.exports.info = 'verify medHealth register message';
 
 let bc, contx;
 
@@ -27,7 +27,8 @@ module.exports.init = function (blockchain, context, args) {
 
 // 查询账户信息
 module.exports.run = function () {
-    return bc.queryState(contx, 'MedHealth', 'v0', '0xa22ac65be61a6068d17037deecac0d1b221e4e52', 'getAccount(address)');
+    // 查询账户账户注册信息判断是否注册成功
+    return bc.queryState(contx, 'MedHealth', 'v0', '0x195c534f3c9358b1a8323423964baace2b1e1bfc', 'getAccount(address)');
 };
 
 module.exports.end = function () {

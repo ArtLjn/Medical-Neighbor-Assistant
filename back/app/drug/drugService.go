@@ -223,16 +223,21 @@ func transferPage(query *gorm.DB, page, size int) (map[string]interface{}, error
 // HospitalAgentDrug 审核药品上链
 // param: drugId 药品id
 func HospitalAgentDrug(drugId string) error {
-	//审核药品上链
-	r, e := util.IsSuccessMsg(util.CommonEq("hospitalReviewDrugDelivery", []interface{}{drugId}))
+	// 审核药品上链
+	r, e := util.IsSuccessMsg(util.CommonEq("hospitalReviewDrugDelivery",
+		[]interface{}{drugId}))
 	if !r || e != nil {
 		log.Println("审核药品上链失败", e)
-		return e
+		return errors.New("审核药品上链失败")
 	}
-	//更新数据库状态为已经收货
-	if err := UpdateDrugRecord(map[string]interface{}{"id": drugId}, map[string]interface{}{"is_receive": true}); err != nil {
-		log.Println("更新收货状态失败", e)
-		return errors.New("更新收货状态失败")
+	// 修改数据库数据,将is_receive字段设置为true
+	if err := UpdateDrugRecord(map[string]interface{}{
+		"id": drugId,
+	}, map[string]interface{}{
+		"is_receive": true,
+	}); err != nil {
+		log.Println("修改审核状态失败", err)
+		return errors.New("修改审核状态失败")
 	}
 	return nil
 }

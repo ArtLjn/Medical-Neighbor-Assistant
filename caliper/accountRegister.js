@@ -28,16 +28,17 @@ module.exports.init = function (blockchain, context, args) {
 
 // 生成交易负载，用于注册账户
 function generateWorkload() {
+    // 用于存放所有交易字段
     let workload = [];
-    // 使用循环将注册信息写入数组   
-    for (let i = 0; i < txnPerBatch; i++) {
+    for (let i = 0;i < txnPerBatch; i ++) {
         // 编写交易字段
         let w = {
-            'transaction_type': 'registerAccount(address,string,string)',
-            'accountAddress': "0xa22ac65be61a6068d17037deecac0d1b221e4e52",
-            'role': "患者",
-            'uuid': '123456',
-        };
+            'transaction_type':'registerAccount(address,string,string)',
+            'accountAddress':"0x195c534f3c9358b1a8323423964baace2b1e1bfc",
+            'role':"患者",
+            'uuid':'0x1001'
+        }
+        // 将交易字段加入数组中
         workload.push(w);
     }
     return workload;
@@ -45,7 +46,9 @@ function generateWorkload() {
 
 // 调用智能合约
 module.exports.run = function () {
+    // 获取相关交易字段
     let args = generateWorkload();
+    // 调用caliper提供的方法，执行所有交易信息
     return bc.invokeSmartContract(contx, 'MedHealth', 'v0', args, null);
 };
 
