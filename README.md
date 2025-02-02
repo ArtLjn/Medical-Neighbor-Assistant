@@ -1,24 +1,24 @@
+<div align="center">
+<!-- markdownlint-disable first-line-h1 -->
+<!-- markdownlint-disable html -->
+<!-- markdownlint-disable no-duplicate-header -->
+
 # Medical neighbor assistant 医邻助手
-<div>
+医邻助手——社区家庭医生问诊管理系统
 
 ![Go version](https://img.shields.io/badge/go-%3E%3Dv1.22-9cf)
 ![Release](https://img.shields.io/badge/release-1.0-green.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 </div>
 
-<b>医邻助手——社区家庭医生问诊管理系统</b>
-
-## 系统设计
-
-<img src="./static/img.png" style="width: 800px"/>
-<img src="./static/img_1.png" style="width: 800px">
-
 ## 项目结构 🧐
 
 | 子项目名 | 项目路径                                               |
 |------|----------------------------------------------------|
-| 后端服务 | [/medHealth/back](back/dd/医邻助手.md)             |
+| 后端服务 | [/medHealth/back](back)             |
 | 智能合约 | [/medHealth/truffle/contract](./truffle/contracts) |
+| 管理后台 | [/medHealth/front/web](front/web/) |
+| 移动端 | [/medHealth/front/uniapp](front/uniapp/) |
 
 
 ## 项目功能 🎯
@@ -29,7 +29,7 @@
 | 医生管理 | 医生注册、登录、信息修改、信息查询 |
 | 问诊管理 | 用户向医生发起问诊、医生接单、问诊记录查询 |
 | 药品管理 | 药品信息管理、药品库存管理、药品购买 |
-| 账单管理 | 账单生成、账单查询、账单支付 |
+| AI问诊  | 问诊总结|
 
 ## 软件截图
 <table>
@@ -50,6 +50,11 @@
         <td><img src="static/991730455425_.pic.jpg"/></td>
     </tr>
 </table>
+
+## 系统设计
+
+<img src="./static/img.png" style="width: 800px"/>
+<img src="./static/img_1.png" style="width: 800px">
 
 ## 项目部署
 
@@ -91,7 +96,7 @@ https://fastgpt.cn/zh
 docker部署参阅官方文档
 https://www.zentao.net/book/zentaopmshelp/405.html
 
-### 七．项目部署
+### 七．系统部署
 1. 在本地打包golang linux amd可执行文件并上传至部署目录
 ![alt text](static/dp5.png)
 
@@ -102,3 +107,6 @@ https://www.zentao.net/book/zentaopmshelp/405.html
 ![alt text](static/dp7.png)
 
 <!-- ### 八．Grafana数据大屏监控组件 -->
+
+### 了解更多
+<img src="static/concat.png" style="width: 300px;height: 400px;"/>
