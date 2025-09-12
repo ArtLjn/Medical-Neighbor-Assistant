@@ -1,6 +1,6 @@
 {
     "name" : "医邻助手",
-    "appid" : "__UNI__7793FCA",
+    "appid" : "__UNI__ACBA787",
     "description" : "",
     "versionName" : "1.1.0",
     "versionCode" : "100",
@@ -41,7 +41,7 @@
     },
     "quickapp" : {},
     "mp-weixin" : {
-        "appid" : "wxccd7e2a0911b3397",
+        "appid" : "wx9de63ffc4ff71940",
         "setting" : {
             "urlCheck" : false,
             "es6" : false,
